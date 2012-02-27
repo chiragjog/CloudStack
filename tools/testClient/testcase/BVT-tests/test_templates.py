@@ -440,7 +440,9 @@ class TestTemplates(cloudstackTestCase):
                                     self.apiclient,
                                     templatefilter=\
                                     self.services["templatefilter"],
-                                    id=self.template_1.id
+                                    id=self.template_1.id,
+                                    account=self.account.account.name,
+                                    domainid=self.account.account.domainid
                                     )
             if isinstance(list_template_response, list):
                 break
@@ -503,7 +505,9 @@ class TestTemplates(cloudstackTestCase):
                                     self.apiclient,
                                     templatefilter=\
                                     self.services["templatefilter"],
-                                    id=self.template_1.id
+                                    id=self.template_1.id,
+                                    account=self.account.account.name,
+                                    domainid=self.account.account.domainid
                                     )
         # Verify template is deleted properly using ListTemplates
         self.assertEqual(
