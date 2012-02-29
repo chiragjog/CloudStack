@@ -66,7 +66,7 @@ class Services:
                         "zoneid": 1,
                         # Optional, if specified the mentioned zone will be
                         # used for tests
-                        "mode": 'advanced',
+                        "mode": 'basic',
                         "sleep": 60,
                         "timeout": 10,
                     }
@@ -398,9 +398,14 @@ class TestVolumes(cloudstackTestCase):
         cmd = deleteVolume.deleteVolumeCmd()
         cmd.id = self.volume.id
         #Proper exception should be raised; deleting attach VM is not allowed
-        with self.assertRaises(Exception):
-            self.apiClient.deleteVolume(cmd)
-
+        #with self.assertRaises(Exception):
+        result = self.apiClient.deleteVolume(cmd)
+        self.assertEqual(
+                         result,
+                         None,
+                         "Check for delete download error while volume is attached"
+                         )
+        
     def test_05_detach_volume(self):
         """Detach a Volume attached to a VM
         """
