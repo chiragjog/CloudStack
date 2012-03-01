@@ -470,10 +470,10 @@ class TestVolumes(cloudstackTestCase):
             fd.write(response.read())
             fd.close()
 
-        except Exception:
+        except Exception as e:
             self.fail(
-                "Extract Volume Failed with invalid URL %s (vol id: %s)" \
-                % (extract_vol.url, self.volume.id)
+                "Extract Volume Failed with invalid URL %s (vol id: %s) Error: %s" \
+                % (extract_vol.url, self.volume.id, e)
             )
 
     def test_07_delete_detached_volume(self):
