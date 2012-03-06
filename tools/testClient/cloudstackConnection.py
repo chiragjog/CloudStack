@@ -53,10 +53,8 @@ class cloudConnection(object):
         try:
             self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
             self.logging.debug("sending request: %s"%requestUrl)
-	    print "Sending: %s"%requestUrl
             response = self.connection.read()
             self.logging.debug("got response: %s"%response)
-	    #print "got response: %s"%response
         except IOError, e:
             if hasattr(e, 'reason'):
                 self.logging.debug("failed to reach %s because of %s"%(self.mgtSvr, e.reason))
@@ -81,10 +79,8 @@ class cloudConnection(object):
 
         self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
         self.logging.debug("sending request without auth: %s"%requestUrl)
-	print "Sending: %s"%requestUrl
         response = self.connection.read()
         self.logging.debug("got response: %s"%response)
-	#print "got response: %s"%response
         return response
     
     def pollAsyncJob(self, jobId, response):
