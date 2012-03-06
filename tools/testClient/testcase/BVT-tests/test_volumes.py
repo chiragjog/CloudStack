@@ -48,7 +48,7 @@ class Services:
                         "volume_offerings": {
                             0: {
                                 "diskname": "TestDiskServ",
-                                "domainid": 1,
+                                "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                             },
                         },
                         "customdisksize": 1,    # GBs
@@ -57,16 +57,16 @@ class Services:
                         "ssh_port": 22,
                         "diskname": "TestDiskServ",
                         "hypervisor": 'XenServer',
-                        "domainid": 1,
+                        "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                         "privateport": 22,
                         "publicport": 22,
                         "protocol": 'TCP',
                         "diskdevice": "/dev/xvdb",
-                        "ostypeid": 12,
-                        "zoneid": 1,
+                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
                         # Optional, if specified the mentioned zone will be
                         # used for tests
-                        "mode": 'basic',
+                        "mode": 'advanced',
                         "sleep": 60,
                         "timeout": 10,
                     }

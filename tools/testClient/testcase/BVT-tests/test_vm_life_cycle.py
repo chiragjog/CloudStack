@@ -77,7 +77,7 @@ class Services:
                         "name": "Small Instance",
                         "displaytext": "Small Instance",
                         "cpunumber": 1,
-                        "cpuspeed": 100,
+                        "cpuspeed": 500,
                         "memory": 256
                     },
                 "medium":
@@ -87,8 +87,8 @@ class Services:
                         "name": "Medium Instance",
                         "displaytext": "Medium Instance",
                         "cpunumber": 1,
-                        "cpuspeed": 100,
-                        "memory": 256
+                        "cpuspeed": 1000,
+                        "memory": 1024
                     }
                 },
                 "iso":  # ISO settings for Attach/Detach ISO tests
