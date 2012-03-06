@@ -185,20 +185,10 @@ class VirtualMachine:
         elif "domainid" in services:
             cmd.domainid = services["domainid"]
 
-        # List Networks for that user
-        command = listNetworks.listNetworksCmd()
-        command.zoneid = services["zoneid"]
-        command.account = accountid or services["account"]
-        command.domainid = domainid or services["domainid"]
-        network = apiclient.listNetworks(command)
-
         if networkids:
             cmd.networkids = networkids
         elif "networkids" in services:
             cmd.networkids = services["networkids"]
-        elif network:   #If user already has source NAT created, then use that
-            if hasattr(network[0], "account"):
-                cmd.networkids = network[0].id
 
         if templateid:
             cmd.templateid = templateid
@@ -1068,7 +1058,7 @@ class Host:
         host = apiclient.addHost(cmd)
         
         if isinstance(host, list):
-            return Host(host[0])
+            return Host(host[0].__dict__)
 
     def delete(self, apiclient):
         """Delete Host"""

@@ -31,8 +31,8 @@ class Services:
                             # Networking mode: Basic or advanced
                             "lb_switch_wait": 10,
                             # Time interval after which LB switches the requests
-                            "sleep": 10,
-                            "timeout":20,
+                            "sleep": 60,
+                            "timeout":10,
                             "network": {
                                   "name": "Test Network",
                                   "displaytext": "Test Network",
@@ -42,7 +42,7 @@ class Services:
                                     "name": "Tiny Instance",
                                     "displaytext": "Tiny Instance",
                                     "cpunumber": 1,
-                                    "cpuspeed": 200,
+                                    "cpuspeed": 100,
                                     # in MHz
                                     "memory": 256,
                                     # In MBs

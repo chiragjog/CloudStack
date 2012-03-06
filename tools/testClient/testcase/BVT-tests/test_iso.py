@@ -62,6 +62,8 @@ class Services:
             "isextractable": True,
             "bootable": True, # For edit template
             "passwordenabled": True,
+            "sleep": 60,
+            "timeout": 10,
             "ostypeid": 12,
             # CentOS 5.3 (64 bit)
             "domainid": 1,
