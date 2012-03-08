@@ -185,20 +185,10 @@ class VirtualMachine:
         elif "domainid" in services:
             cmd.domainid = services["domainid"]
 
-        # List Networks for that user
-        command = listNetworks.listNetworksCmd()
-        command.zoneid = services["zoneid"]
-        command.account = accountid or services["account"]
-        command.domainid = domainid or services["domainid"]
-        network = apiclient.listNetworks(command)
-        
         if networkids:
             cmd.networkids = networkids
         elif "networkids" in services:
             cmd.networkids = services["networkids"]
-#        elif network:   #If user already has source NAT created, then use that
-#            if hasattr(network[0], "account"):
-#                cmd.networkids = str(network[0].id)
 
         if templateid:
             cmd.templateid = templateid
@@ -274,13 +264,16 @@ class VirtualMachine:
         cmd.id = self.id
         apiclient.rebootVirtualMachine(cmd)
 
-    def get_ssh_client(self, ipaddress=None, reconnect=False):
+    def get_ssh_client(self, ipaddress=None, reconnect=False, port=None):
         """Get SSH object of VM"""
 
         # If NAT Rules are not created while VM deployment in Advanced mode
         # then, IP address must be passed
         if ipaddress != None:
             self.ssh_ip = ipaddress
+        if port:
+            self.ssh_port = port
+
         if reconnect:
             self.ssh_client = is_server_ssh_ready(
                                                     self.ssh_ip,
@@ -1233,6 +1226,8 @@ class VpnUser:
 
         cmd = removeVpnUser.removeVpnUserCmd()
         cmd.username = self.username
+        cmd.account = self.account
+        cmd.domainid = self.domainid
         apiclient.removeVpnUser(cmd)
 
 
