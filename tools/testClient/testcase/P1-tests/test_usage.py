@@ -1422,28 +1422,28 @@ class TestVpnUsage(cloudstackTestCase):
                         ]
         return
 
-#    @classmethod
-#    def tearDownClass(cls):
-#        try:
-#            #Cleanup resources used
-#            cleanup_resources(cls.api_client, cls._cleanup)
-#        except Exception as e:
-#            raise Exception("Warning: Exception during cleanup : %s" % e)
-#        return
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            #Cleanup resources used
+            cleanup_resources(cls.api_client, cls._cleanup)
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
 
     def setUp(self):
         self.apiclient = self.testClient.getApiClient()
         self.dbclient = self.testClient.getDbConnection()
         self.cleanup = []
         return
-#
-#    def tearDown(self):
-#        try:
-#            #Clean up, terminate the created instance, VPN users
-#            cleanup_resources(self.apiclient, self.cleanup)
-#        except Exception as e:
-#            raise Exception("Warning: Exception during cleanup : %s" % e)
-#        return
+
+    def tearDown(self):
+        try:
+            #Clean up, terminate the created instance, VPN users
+            cleanup_resources(self.apiclient, self.cleanup)
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
 
     def test_01_vpn_usage(self):
         """Test Create/Delete a VPN and verify correct usage is recorded
@@ -1477,8 +1477,7 @@ class TestVpnUsage(cloudstackTestCase):
                                  account=self.account.account.name,
                                  domainid=self.account.account.domainid
                                  )
-        print vpnuser.__dict__
-        print vpn.__dict__
+
         # Remove VPN user
         self.debug("Deleting VPN user: %s" % vpnuser.id)
         vpnuser.delete(self.apiclient)
