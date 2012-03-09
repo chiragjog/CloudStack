@@ -75,7 +75,7 @@ class Services:
                         "zoneid": 2,
                         # Optional, if specified the mentioned zone will be
                         # used for tests
-                        "mode": 'basic',
+                        "mode": 'advanced',
                     }
 
 

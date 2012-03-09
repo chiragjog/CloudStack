@@ -280,7 +280,7 @@ class TestSnapshots(cloudstackTestCase):
                                         account=self.account.account.name,
                                         domainid=self.account.account.domainid
                                         )
-        self.debug("Created Volume from Snapshot: %s" % (
+        self.debug("Created Volume: %s from Snapshot: %s" % (
                                             volume_from_snapshot.id, 
                                             snapshot.id))
         volumes = Volume.list(
@@ -378,7 +378,7 @@ class TestSnapshots(cloudstackTestCase):
             ssh_client.execute(c)
         return
 
-
+@unittest.skip("Open Questions")
 class TestTemplate(cloudstackTestCase):
 
     def setUp(self):
@@ -573,7 +573,7 @@ class TestNATRules(cloudstackTestCase):
     def tearDown(self):
         cleanup_resources(self.apiclient, self.cleanup)
         return
-#    
+
     def test_01_firewall_rules_port_fw(self):
         """"Checking firewall rules deletion after static NAT disable"""
 
@@ -621,7 +621,6 @@ class TestNATRules(cloudstackTestCase):
                             nat_rule.id,
                             "Check Correct IP forwarding Rule is returned"
                         )
-                
         # Verify the entries made in firewall_rules tables
         self.debug(
                    "select id, state from firewall_rules where ip_address_id = %s;" \
@@ -644,7 +643,7 @@ class TestNATRules(cloudstackTestCase):
                             )
         
         for qresult in qresultset:
-            self.assertNotEqual(
+            self.assertEqual(
                             qresult[1],
                             'Active',
                             "Check state of the static NAT rule in database"
@@ -674,8 +673,8 @@ class TestNATRules(cloudstackTestCase):
                         )
         
         self.assertEqual(
-                            qresultset,
-                            None,
+                            len(qresultset),
+                            0,
                             "Check DB Query result set"
                             )
         return

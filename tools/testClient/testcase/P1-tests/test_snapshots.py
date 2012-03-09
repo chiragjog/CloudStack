@@ -59,7 +59,7 @@ class Services:
                         "recurring_snapshot": {
                                     "intervaltype": 'HOURLY',
                                     # Frequency of snapshots
-                                    "maxsnaps": 2, # Should be min 2
+                                    "maxsnaps": 1, # Should be min 2
                                     "schedule": 1,
                                     "timezone": 'US/Arizona',
                                     # Timezone Formats - http://cloud.mindtouch.us/CloudStack_Documentation/Developer's_Guide%3A_CloudStack 
@@ -81,9 +81,6 @@ class Services:
                         "sub_lvl_dir2": "test2",
                         "random_data": "random.data",
 
-                        "sec_storage": '192.168.100.131',
-                        # IP address of Sec storage where snapshots are stored
-                        "exportpath": 'SecondaryStorage',
                         "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)
                         "zoneid": 1,
@@ -214,6 +211,8 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
                             snapshot.id,
                             "Check snapshot id in list resources call"
                         )
+        self.debug("select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
+                        % snapshot.id)
         # Verify backup_snap_id is not NULL
         qresultset = self.dbclient.execute(
                         "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
@@ -1306,7 +1305,7 @@ class TestSnapshotEvents(cloudstackTestCase):
         snapshot.delete(self.apiclient)
 
         # Sleep to ensure that snapshot is deleted properly
-        time.sleep(30)
+        time.sleep(self.services["sleep"])
         events = list_events(
                              self.apiclient,
                              account=self.account.account.name,
@@ -1323,9 +1322,9 @@ class TestSnapshotEvents(cloudstackTestCase):
                             None,
                             "Check if event exists in list events call"
                             )
-        self.assertEqual(
+        self.assertIn(
                             events[0].state,
-                            'Completed',
+                            ['Completed', 'Scheduled'],
                             "Check events state in list events call"
                         )
         return

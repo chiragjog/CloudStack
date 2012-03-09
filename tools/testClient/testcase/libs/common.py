@@ -99,9 +99,7 @@ def download_systemplates_sec_storage(server, services):
                                         )
             ]
     for c in cmds:
-        print c
         result = ssh.execute(c)
-        print result
 
     res = str(result)
 

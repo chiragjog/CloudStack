@@ -55,14 +55,6 @@ class Services:
                                     "publicport": 22,
                                     "protocol": 'TCP',
                                 },
-                        "recurring_snapshot": {
-                                     "intervaltype": 'HOURLY',
-                                     # Frequency of snapshots
-                                     "maxsnaps": 1, # Should be min 2
-                                     "schedule": 1,
-                                     "timezone": 'US/Arizona',
-                                     # Timezone Formats - http://cloud.mindtouch.us/CloudStack_Documentation/Developer's_Guide%3A_CloudStack 
-                                },
                         "templates": {
                                     "displaytext": 'Template',
                                     "name": 'Template',
@@ -84,8 +76,8 @@ class Services:
                                    "name": "SSH",
                                    "alg": "roundrobin",
                                    # Algorithm used for load balancing
-                                   "privateport": 80,
-                                   "publicport": 80,
+                                   "privateport": 22,
+                                   "publicport": 2222,
                                 },
                         "natrule": {
                                    "privateport": 22,
@@ -106,6 +98,7 @@ class Services:
                         "timeout": 10,
                         "mode":'advanced'
                     }
+
 
 class TestVmUsage(cloudstackTestCase):
 
@@ -264,6 +257,7 @@ class TestVmUsage(cloudstackTestCase):
                         )
         return
 
+
 class TestPublicIPUsage(cloudstackTestCase):
 
     @classmethod
@@ -350,7 +344,7 @@ class TestPublicIPUsage(cloudstackTestCase):
         # 3. Delete the newly created account
 
         self.debug("Deleting public IP: %s" % 
-                                self.public_ip.ipaddesss.ipaddress)
+                                self.public_ip.ipaddress.ipaddress)
 
         # Release one of the IP
         self.public_ip.delete(self.apiclient)
@@ -508,17 +502,19 @@ class TestVolumeUsage(cloudstackTestCase):
                         "select type from usage_event where account_id = %s;" \
                         % self.account.account.id
                         )
-        self.assertNotEqual(
-                            len(qresultset),
-                            0,
-                            "Check DB Query result set"
-                            )
+
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
                          "Check DB query result set for valid data"
                          )
-        
+
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+
         qresult = str(qresultset)
         self.debug("Query result: %s" % qresult)
         # Check VOLUME.CREATE, VOLUME.DESTROY events in cloud.usage_event table
@@ -581,8 +577,10 @@ class TestTemplateUsage(cloudstackTestCase):
                                    virtualmachineid=cls.virtual_machine.id,
                                    type='ROOT'
                                    )
-
-        cls.volume = list_volume[0]
+        if isinstance(list_volume, list):        
+            cls.volume = list_volume[0]
+        else:
+            raise Exception("List Volumes failed!")
         cls._cleanup = [
                         cls.account,
                         ]
@@ -1292,7 +1290,7 @@ class TestVpnUsage(cloudstackTestCase):
         vpnuser = VpnUser.create(
                                  self.apiclient,
                                  self.services["vpn_user"]["username"],
-                                 self.services["vpn_user"]["username"],
+                                 self.services["vpn_user"]["password"],
                                  account=self.account.account.name,
                                  domainid=self.account.account.domainid
                                  )
@@ -1301,7 +1299,7 @@ class TestVpnUsage(cloudstackTestCase):
         vpnuser.delete(self.apiclient)
 
         # Delete VPN access
-        self.debug("Deleting VPN: %s" % vpn.id)
+        self.debug("Deleting VPN: %s" % vpn.publicipid)
         vpn.delete(self.apiclient)
 
         self.debug("select type from usage_event where account_id = %s;" \

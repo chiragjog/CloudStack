@@ -90,7 +90,7 @@ class Services:
                      }
 
 
-@unittest.skip("Testing is pending")
+@unittest.skip("Open questions")
 class TestCreateTemplate(cloudstackTestCase):
 
     def setUp(self):
@@ -451,7 +451,6 @@ class TestTemplates(cloudstackTestCase):
         cmd.zoneid = self.services["destzoneid"]
         self.apiclient.deleteTemplate(cmd)
         return
-
 
     def test_03_delete_template(self):
         """Test Delete template

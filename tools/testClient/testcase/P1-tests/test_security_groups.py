@@ -620,35 +620,21 @@ class TestRevokeIngressRule(cloudstackTestCase):
         
         self.debug("Revoking ingress rule for sec group ID: %s for ssh access" 
                                                             % security_group.id)
-        # Revoke Ingress rule from security group
-        result = None
-        timeout = self.services["timeout"]
-        while not isinstance(result, list):
-            try:
-                # Revoke Security group to SSH to VM
-                result = security_group.revoke(
+        # Revoke Security group to SSH to VM
+        result = security_group.revoke(
                                 self.apiclient, 
-                                id = ssh_rule["ruleid"]
+                                id=ssh_rule["ruleid"]
                                 )
-                self.debug("Revoke ingress rule result: %s" % result)
-            except Exception as e:
-                break
-            
-            if isinstance(result, list):
-                break
-            
-            if timeout == 0: 
-                raise Exception(
-                    "Revoke ingress rule (ID: %s) failed" %
-                                                        ssh_rule["ruleid"])
-            time.sleep(5)
-            timeout = timeout - 1
-            
-            
+
         # SSH Attempt to VM should fail
         with self.assertRaises(Exception):
             self.debug("SSH into VM: %s" % self.virtual_machine.id)
-            self.virtual_machine.get_ssh_client(reconnect=True)
+            remoteSSHClient.remoteSSHClient(
+                                        self.virtual_machine.ssh_ip,
+                                        self.virtual_machine.ssh_port,
+                                        self.virtual_machine.username,
+                                        self.virtual_machine.password
+                                        )
         return
 
 
@@ -1078,13 +1064,24 @@ class TestDeleteSecurityGroup(cloudstackTestCase):
                                 )
         self.debug("Deploying VM in account: %s" % self.account.account.name)
         
-        
         # Deleting Security group should raise exception
-        with self.assertRaises(Exception):
-            security_group.delete(self.apiclient)
+        security_group.delete(self.apiclient)
+        
+        #sleep to ensure that Security group is deleted properly
+        time.sleep(self.services["sleep"])
+        
+        # Default Security group should not have any ingress rule
+        sercurity_groups = SecurityGroup.list(
+                                              self.apiclient,
+                                              id=security_group.id
+                                              )
+        self.assertNotEqual(
+                            sercurity_groups, 
+                            None, 
+                            "Check List Security groups response"
+                            )
         return
-        
-        
+
     def test_02_delete_security_grp_withoout_running_vm(self):
         """Test delete security group without running VM"""
         
@@ -1241,7 +1238,6 @@ class TestIngressRule(cloudstackTestCase):
             raise Exception("Warning: Exception during cleanup : %s" % e)
 
         return
-    
 
     def test_01_authorizeIngressRule_AfterDeployVM(self):
         """Test delete security group with running VM"""
@@ -1352,7 +1348,6 @@ class TestIngressRule(cloudstackTestCase):
             self.fail("Ping failed for ingress rule ID: %s, %s" \
                       % (ingress_rule_2["id"], e))
         return
-        
 
     def test_02_revokeIngressRule_AfterDeployVM(self):
         """Test Revoke ingress rule after deploy VM"""
@@ -1481,30 +1476,13 @@ class TestIngressRule(cloudstackTestCase):
                     self.account.account.name
                 ))
         
-        # Revoke Ingress rule from security group
-        result = None
-        timeout = self.services["timeout"]
-        while not isinstance(result, list):
-            try:
-                # Revoke Security group to SSH to VM
-                result = security_group.revoke(
+       # Revoke Security group to SSH to VM
+       result = security_group.revoke(
                                 self.apiclient, 
                                 id = icmp_rule["ruleid"]
                                 )
-                self.debug("Revoke ingress rule result: %s" % result)
-            except Exception as e:
-                break
-            
-            if isinstance(result, list):
-                break
-            
-            if timeout == 0: 
-                raise Exception(
-                    "Revoke ingress rule (ID: %s) failed" %
-                                                        icmp_rule["ruleid"])
-            time.sleep(5)
-            timeout = timeout - 1
-        
+       self.debug("Revoke ingress rule result: %s" % result)
+
         time.sleep(self.services["sleep"])
         # User should not be able to ping VM
         try:

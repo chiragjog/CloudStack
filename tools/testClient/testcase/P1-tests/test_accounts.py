@@ -425,7 +425,7 @@ class TestRemoveUserFromAccount(cloudstackTestCase):
                             "Check state of VMs associated with account"
                             )
         return
-
+    @unittest.skip("Open Questions")
     def test_02_remove_all_users(self):
         """Test Remove both users from the account 
         """
@@ -743,7 +743,7 @@ class TestServiceOfferingSiblings(cloudstackTestCase):
         return
 
 
-@unittest.skip("Not tested")
+@unittest.skip("Open Questions")
 class TestServiceOfferingHierarchy(cloudstackTestCase):
 
     @classmethod
@@ -867,7 +867,7 @@ class TestServiceOfferingHierarchy(cloudstackTestCase):
             )
         return
 
-@unittest.skip("Not tested")
+@unittest.skip("Open Questions")
 class TesttemplateHierarchy(cloudstackTestCase):
 
     @classmethod
@@ -1003,7 +1003,7 @@ class TesttemplateHierarchy(cloudstackTestCase):
             )
         return
 
-@unittest.skip("Not tested")
+@unittest.skip("Open Questions")
 class TestAddVmToSubDomain(cloudstackTestCase):
 
     @classmethod
@@ -1146,8 +1146,6 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls._cleanup = [
-                        cls.account_1,
-                        cls.account_2,
                         cls.service_offering,
                         cls.sub_domain,
                         cls.secondary_storage,
@@ -1162,8 +1160,46 @@ class TestAddVmToSubDomain(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            # Cleanup resources used
-            cleanup_resources(cls.api_client, cls._cleanup)
+            # Cleanup the accounts
+            cls.account_1.delete(cls.api_client)
+            cls.account_2.delete(cls.api_client)
+            
+            cleanup_wait = list_configurations(
+                                          cls.api_client,
+                                          name='account.cleanup.interval'
+                                          )
+            # Sleep for account.cleanup.interval*3
+            if isinstance(cleanup_wait, list):
+                time.sleep(cleanup_wait[0].value * 3)
+            
+            # Delete Service offerings and subdomains
+            cls.service_offering.delete(cls.api_client)
+            cls.sub_domain.delete(cls.api_client)
+            
+            # Destroy SSVMs and wait for volumes to cleanup 
+            ssvms = list_ssvms(
+                               cls.api_client,
+                               zoneid=cls.zone.id
+                               )
+            
+            if isinstance(ssvms, list):
+                for ssvm in ssvms:
+                    cmd = destroySystemVm.destroySystemVmCmd()
+                    cmd.id = ssvm.id
+                    cls.api_client.destroySystemVm(cmd)
+
+            # Sleep for account.cleanup.interval*3 to wait for SSVM volumee
+            # to cleanup
+            if isinstance(cleanup_wait, list):
+                time.sleep(cleanup_wait[0].value * 3)
+
+            # Cleanup Primary, secondary storage, hosts, zones etc.
+            cls.secondary_storage.delete(cls.api_client)
+            cls.primary_storage.delete(cls.api_client)
+            cls.host.delete(cls.api_client)
+            cls.cluster.delete(cls.api_client)
+            cls.pod.delete(cls.api_client)
+            cls.zone.delete(cls.api_client)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return

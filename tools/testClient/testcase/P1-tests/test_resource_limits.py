@@ -541,7 +541,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
                               2, # Volume
                               account=self.account_1.account.name,
                               domainid=self.account_1.account.domainid,
-                              max=3
+                              max=2
                               )
 
         self.debug(

@@ -61,7 +61,7 @@ class Services:
                                     "name": "SSH",
                                     "alg": "roundrobin",
                                     # Algorithm used for load balancing
-                                    "privateport": 80,
+                                    "privateport": 22,
                                     "publicport": 2222,
                                 },
                          "fw_rule":{
@@ -211,9 +211,9 @@ class TestRouterServices(cloudstackTestCase):
                              "Check list networks response"
                              )
         for network in networks:
-            self.assertEqual(
+            self.assertIn(
                         network.state,
-                        'Implemented',
+                        ['Implemented','Allocated'],
                         "Check list network response for network state"
                     )
             self.debug("Network ID: %s & Network state: %s" % (
@@ -359,9 +359,9 @@ class TestRouterServices(cloudstackTestCase):
                              )
         # Check if network in 'Implemented' state
         for network in networks:
-            self.assertEqual(
+            self.assertIn(
                         network.state,
-                        'Implemented',
+                        ['Implemented','Allocated'],
                         "Check list network response for network state"
                     )
             self.debug("Network ID: %s & Network state: %s" % (
@@ -767,6 +767,9 @@ class TestRouterStopAssociateIp(cloudstackTestCase):
                                 'ip addr show'
                                 )
         self.debug("ip addr show: %s" % str(result))
+        self.debug("Public IP address: %s" % public_ip.ipaddress.ipaddress)
+        
+        res = str(result)
         self.assertEqual(
                             result.count(str(public_ip.ipaddress.ipaddress)),
                             1,
@@ -960,13 +963,11 @@ class TestRouterStopCreatePF(cloudstackTestCase):
                     "Check list port forwarding rules"
                     )
         try:
-            remoteSSHClient.remoteSSHClient(
-                                            nat_rule.ipaddress,
-                                            nat_rule.publicport,
-                                            self.vm_1.username,
-                                            self.vm_1.password
-                                            )
+
             self.debug("SSH into VM with ID: %s" % nat_rule.ipaddress)
+            
+            self.vm_1.ssh_port = nat_rule.publicport
+            self.vm_1.get_ssh_client(nat_rule.ipaddress)
         except Exception as e:
             self.fail(
                       "SSH Access failed for %s: %s" % \
@@ -1161,13 +1162,9 @@ class TestRouterStopCreateLB(cloudstackTestCase):
                     )
 
         try:
-            remoteSSHClient.remoteSSHClient(
-                                    public_ip.ipaddress,
-                                    self.services["lb_rule"]["publicport"],
-                                    self.vm_1.username,
-                                    self.vm_1.password
-                                    )
             self.debug("SSH into VM with IP: %s" % public_ip.ipaddress)
+            self.vm_1.ssh_port = self.services["lbrule"]["publicport"]
+            self.vm_1.get_ssh_client(public_ip.ipaddress)
         except Exception as e:
             self.fail(
                       "SSH Access failed for %s: %s" % \
@@ -1175,7 +1172,7 @@ class TestRouterStopCreateLB(cloudstackTestCase):
                       )
         return
 
-@unittest.skip("iptables does not return anything")
+
 class TestRouterStopCreateFW(cloudstackTestCase):
 
     @classmethod
@@ -1342,7 +1339,7 @@ class TestRouterStopCreateFW(cloudstackTestCase):
         # After Router start, FW rule should be in Active state
         fw_rules = list_firewall_rules(
                                    self.apiclient,
-                                   ipaddressid=public_ip.id
+                                   id=fw_rule.id,
                                    )
         self.assertEqual(
                         isinstance(fw_rules, list),
@@ -1383,12 +1380,13 @@ class TestRouterStopCreateFW(cloudstackTestCase):
                                 self.vm_1.username,
                                 self.vm_1.password,
                                 router.linklocalip,
-                                'iptables -t nat -nvx'
+                                'iptables -t nat -L'
                                 )
-        self.debug("iptables -t nat -nvx: %s" % result)
-        # TODO : Find assertion condition                        )
+        self.debug("iptables -t nat -L: %s" % result)
+        self.debug("Public IP: %s" % public_ip.ipaddress)
+        res = str(result)
         self.assertEqual(
-                            result.count(str(public_ip.ipaddress)),
+                            res.count(str(public_ip.ipaddress)),
                             1,
                             "Check public IP address"
                         )

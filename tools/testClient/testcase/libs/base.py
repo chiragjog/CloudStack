@@ -264,13 +264,16 @@ class VirtualMachine:
         cmd.id = self.id
         apiclient.rebootVirtualMachine(cmd)
 
-    def get_ssh_client(self, ipaddress=None, reconnect=False):
+    def get_ssh_client(self, ipaddress=None, reconnect=False, port=None):
         """Get SSH object of VM"""
 
         # If NAT Rules are not created while VM deployment in Advanced mode
         # then, IP address must be passed
         if ipaddress != None:
             self.ssh_ip = ipaddress
+        if port:
+            self.ssh_port = port
+
         if reconnect:
             self.ssh_client = is_server_ssh_ready(
                                                     self.ssh_ip,
@@ -1223,6 +1226,8 @@ class VpnUser:
 
         cmd = removeVpnUser.removeVpnUserCmd()
         cmd.username = self.username
+        cmd.account = self.account
+        cmd.domainid = self.domainid
         apiclient.removeVpnUser(cmd)
 
 
