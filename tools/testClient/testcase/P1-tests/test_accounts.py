@@ -1099,13 +1099,13 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                 )
         ssvm = ssvm_response[0]
         # Download BUILTIN templates
-#        download_builtin_templates(
-#                                   cls.api_client,
-#                                   cls.zone.id,
-#                                   cls.services["cluster"]["hypervisor"],
-#                                   cls.services["host"],
-#                                   ssvm.linklocalip
-#                                   )
+        download_builtin_templates(
+                                   cls.api_client,
+                                   cls.zone.id,
+                                   cls.services["cluster"]["hypervisor"],
+                                   cls.services["host"],
+                                   ssvm.linklocalip
+                                   )
         cls.sub_domain = Domain.create(
                                    cls.api_client,
                                    cls.services["domain"],
