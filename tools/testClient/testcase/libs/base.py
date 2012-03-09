@@ -1368,6 +1368,32 @@ class SecondaryStorage:
         apiclient.deleteHost(cmd)
         
 
+class PhysicalNetwork:
+    """Manage physical network storage"""
+
+    def __init__(self, items):
+        self.__dict__.update(items)
+
+    @classmethod
+    def create(cls, apiclient, services, zoneid):
+        """Create physical network"""
+        cmd = createPhysicalNetwork.createPhysicalNetworkCmd()
+
+        cmd.name = services["name"]
+        cmd.zoneid = zoneid
+        cmd.broadcastdomainrange = services["broadcastdomainrange"]
+        cmd.domainid = services["domainid"]
+        cmd.isolationmethods = services["isolationmethods"]
+        return PhysicalNetwork(apiclient.createPhysicalNetwork(cmd).__dict__)
+
+    def delete(self, apiclient):
+        """Delete Physical Network"""
+
+        cmd = deletePhysicalNetwork.deletePhysicalNetworkCmd()
+        cmd.id = self.id
+        apiclient.deletePhysicalNetwork(cmd)
+
+
 class SecurityGroup:
     """Manage Security Groups"""
 

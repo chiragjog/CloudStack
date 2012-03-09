@@ -33,7 +33,7 @@ class Services:
                                     {
                                         "displayname": "Test VM",
                                         "username": "root",
-                                        "password": "fr3sca",
+                                        "password": "password",
                                         "ssh_port": 22,
                                         "hypervisor": 'XenServer',
                                         # Hypervisor type should be same as
@@ -545,7 +545,7 @@ class TestRouterServices(cloudstackTestCase):
                                                     ))
         return
 
-@unittest.skip("Ip addr show doesn't list public IP on eth2")
+@unittest.skip("Open Questions")
 class TestRouterStopAssociateIp(cloudstackTestCase):
 
     @classmethod
@@ -772,7 +772,7 @@ class TestRouterStopAssociateIp(cloudstackTestCase):
                         )
         return
 
-@unittest.skip("Not able to SSH after restart")
+
 class TestRouterStopCreatePF(cloudstackTestCase):
 
     @classmethod
@@ -970,7 +970,7 @@ class TestRouterStopCreatePF(cloudstackTestCase):
                       )
         return
 
-@unittest.skip("Not able to SSH after restart")
+
 class TestRouterStopCreateLB(cloudstackTestCase):
 
     @classmethod
@@ -1159,7 +1159,7 @@ class TestRouterStopCreateLB(cloudstackTestCase):
 
         try:
             self.debug("SSH into VM with IP: %s" % public_ip.ipaddress)
-            self.vm_1.ssh_port = self.services["lb_rule"]["publicport"]
+            self.vm_1.ssh_port = self.services["lbrule"]["publicport"]
             self.vm_1.get_ssh_client(public_ip.ipaddress)
         except Exception as e:
             self.fail(

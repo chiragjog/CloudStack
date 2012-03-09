@@ -115,7 +115,7 @@ def download_systemplates_sec_storage(server, services):
 def wait_for_ssvms(apiclient, zoneid, podid):
     """After setup wait for SSVMs to come Up"""
 
-    time.sleep(30)
+    time.sleep(30)  
     timeout = 40
     while True:
             list_ssvm_response = list_ssvms(

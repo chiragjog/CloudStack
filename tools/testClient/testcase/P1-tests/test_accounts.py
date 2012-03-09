@@ -34,15 +34,21 @@ class Services:
                                  "name": "Test Pod",
                                  "gateway": '192.168.100.1',
                                  "netmask": '255.255.255.0',
-                                 "startip": '192.168.100.136',
-                                 "endip": '192.168.100.141',
+                                 "startip": '192.168.100.132',
+                                 "endip": '192.168.100.140',
                                  },
+                         "physical_network": {
+                                  "name" : "Physical network 1",
+                                  "broadcastdomainrange": "Pod",
+                                  "domainid": '0ec2220b-3a73-435b-abad-eb5860186421',
+                                  "isolationmethods": 'VLAN'          
+                                },
                          "public_ip": {
                                  "gateway": '192.168.100.1',
                                  "netmask": '255.255.255.0',
                                  "forvirtualnetwork": False,
-                                 "startip": '192.168.100.136',
-                                 "endip": '192.168.100.141',
+                                 "startip": '192.168.100.142',
+                                 "endip": '192.168.100.149',
                                  "vlan": "untagged",
                                  },
                          "cluster": {
@@ -66,11 +72,11 @@ class Services:
 
                          "primary_storage": {
                                 "name": "Test Primary",
-                                "url": "nfs://192.168.100.131/Primary3",
+                                "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo1",
                                 # Format: File_System_Type/Location/Path
                             },
                         "sec_storage": {
-                                 "url": "nfs://192.168.100.131/SecStorage"
+                                 "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo1"
                                  # Format: File_System_Type/Location/Path
 
 
@@ -83,7 +89,7 @@ class Services:
                         },
                         "sysVM": {
                                         "mnt_dir": '/mnt/test',
-                                        "sec_storage": '192.168.100.131',
+                                        "sec_storage": '192.168.100.150',
                                         "path": 'TestSec',
                                         "command": '/usr/lib64/cloud/agent/scripts/storage/secondary/cloud-install-sys-tmplt',
                                         "download_url": 'http://download.cloud.com/releases/2.2.0/systemvm.vhd.bz2',
@@ -1030,6 +1036,12 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         cls.services["public_ip"]["zoneid"] = cls.zone.id
         cls.services["public_ip"]["podid"] = cls.pod.id
 
+        cls.physical_network = PhysicalNetwork.create(
+                                                cls.api_client, 
+                                                cls.services["physical_network"],
+                                                cls.zone.id
+                                                )
+
         cls.public_ip_range = PublicIpRange.create(
                                               cls.api_client,
                                               cls.services["public_ip"]
@@ -1087,13 +1099,13 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                 )
         ssvm = ssvm_response[0]
         # Download BUILTIN templates
-        download_builtin_templates(
-                                   cls.api_client,
-                                   cls.zone.id,
-                                   cls.services["cluster"]["hypervisor"],
-                                   cls.services["host"],
-                                   ssvm.linklocalip
-                                   )
+#        download_builtin_templates(
+#                                   cls.api_client,
+#                                   cls.zone.id,
+#                                   cls.services["cluster"]["hypervisor"],
+#                                   cls.services["host"],
+#                                   ssvm.linklocalip
+#                                   )
         cls.sub_domain = Domain.create(
                                    cls.api_client,
                                    cls.services["domain"],
@@ -1172,7 +1184,35 @@ class TestAddVmToSubDomain(cloudstackTestCase):
             if isinstance(cleanup_wait, list):
                 time.sleep(cleanup_wait[0].value * 3)
             
-            cleanup_resources(cls.api_client, cls._cleanup)
+            # Delete Service offerings and subdomains
+            cls.service_offering.delete(cls.api_client)
+            cls.sub_domain.delete(cls.api_client)
+            
+            # Destroy SSVMs and wait for volumes to cleanup 
+            ssvms = list_ssvms(
+                               cls.api_client,
+                               zoneid=cls.zone.id
+                               )
+            
+            if isinstance(ssvms, list):
+                for ssvm in ssvms:
+                    cmd = destroySystemVm.destroySystemVmCmd()
+                    cmd.id = ssvm.id
+                    cls.api_client.destroySystemVm(cmd)
+
+            # Sleep for account.cleanup.interval*3 to wait for SSVM volumee
+            # to cleanup
+            if isinstance(cleanup_wait, list):
+                time.sleep(cleanup_wait[0].value * 3)
+
+            # Cleanup Primary, secondary storage, hosts, zones etc.
+            cls.secondary_storage.delete(cls.api_client)
+            cls.primary_storage.delete(cls.api_client)
+            cls.host.delete(cls.api_client)
+            cls.cluster.delete(cls.api_client)
+            cls.pod.delete(cls.api_client)
+            cls.physical_network.delete(cls.api_client)
+            cls.zone.delete(cls.api_client)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
