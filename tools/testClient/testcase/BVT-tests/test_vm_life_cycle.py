@@ -43,7 +43,7 @@ class Services:
                     "password": "password",
                     "ssh_port": 22,
                     "hypervisor": 'XenServer',
-                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
+                    "domainid": 'a63624d2-42ec-49ba-a3d1-9f4ed991a5ce',
                     "privateport": 22,
                     "publicport": 22,
                     "protocol": 'TCP',
@@ -55,7 +55,7 @@ class Services:
                     "password": "password",
                     "ssh_port": 22,
                     "hypervisor": 'XenServer',
-                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
+                    "domainid": 'a63624d2-42ec-49ba-a3d1-9f4ed991a5ce',
                     "privateport": 22,
                     "publicport": 22,
                     "protocol": 'TCP',
@@ -97,7 +97,7 @@ class Services:
                     "name": "testISO",
                     "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                      # Source URL where ISO is located
-                    "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                     "mode": 'HTTP_DOWNLOAD', # Downloading existing ISO 
                 },
             "diskdevice": '/dev/xvdd',
@@ -107,9 +107,9 @@ class Services:
             "timeout": 10,
             "hostid": 5,
             #Migrate VM to hostid
-            "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
             # CentOS 5.3 (64-bit)
-            "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
+            "zoneid": 'e6d7ae0b-072c-41e6-ac45-8e220f6a0cde',
             # Optional, if specified the mentioned zone will be
             # used for tests
             "mode":'advanced',

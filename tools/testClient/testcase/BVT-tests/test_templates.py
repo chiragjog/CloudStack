@@ -46,7 +46,7 @@ class Services:
                         "virtual_machine": {
                                     "displayname": "testVM",
                                     "hypervisor": 'XenServer',
-                                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
+                                    "domainid": 'a63624d2-42ec-49ba-a3d1-9f4ed991a5ce',
                                     "protocol": 'TCP',
                                     "ssh_port": 22,
                                     "username": "root",
@@ -60,12 +60,12 @@ class Services:
                          "template_1": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                          },
                          "template_2": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "isfeatured": True,
                                 "ispublic": True,
                                 "isextractable": True,
@@ -79,8 +79,8 @@ class Services:
                         "isextractable": False,
                         "bootable": True,
                         "passwordenabled": True,
-                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
-                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "zoneid": 'e6d7ae0b-072c-41e6-ac45-8e220f6a0cde',
                         # Optional, if specified the mentioned zone will be
                         # used for tests
                         "mode": 'advanced',

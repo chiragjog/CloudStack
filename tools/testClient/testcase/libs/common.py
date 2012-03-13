@@ -16,6 +16,21 @@ from base import *
 #Import System modules
 import time
 
+def get_domain(apiclient, services=None):
+    "Returns a default domain"
+
+    cmd = listDomains.listDomainsCmd()
+    if services:
+        if "domainid" in services:
+            cmd.id = services["domainid"]
+    
+    domains = apiclient.listDomains(cmd)
+    
+    if isinstance(domains, list):
+        return domains[0]
+    else:
+        raise Exception("Failed to find specified domain.") 
+
 def get_zone(apiclient, services=None):
     "Returns a default zone"
 
@@ -115,7 +130,7 @@ def download_systemplates_sec_storage(server, services):
 def wait_for_ssvms(apiclient, zoneid, podid):
     """After setup wait for SSVMs to come Up"""
 
-    time.sleep(30)  
+    time.sleep(30)
     timeout = 40
     while True:
             list_ssvm_response = list_ssvms(
@@ -413,3 +428,24 @@ def list_usage_records(apiclient, **kwargs):
     cmd = listUsageRecords.listUsageRecordsCmd()
     [setattr(cmd, k, v) for k, v in kwargs.items()]
     return(apiclient.listUsageRecords(cmd))
+
+def list_nw_service_prividers(apiclient, **kwargs):
+    """Lists Network service providers"""
+
+    cmd = listNetworkServiceProviders.listNetworkServiceProvidersCmd()
+    [setattr(cmd, k, v) for k, v in kwargs.items()]
+    return(apiclient.listNetworkServiceProviders(cmd))
+
+def list_virtual_router_elements(apiclient, **kwargs):
+    """Lists Virtual Router elements"""
+
+    cmd = listVirtualRouterElements.listVirtualRouterElementsCmd()
+    [setattr(cmd, k, v) for k, v in kwargs.items()]
+    return(apiclient.listVirtualRouterElements(cmd))
+
+def list_network_offerings(apiclient, **kwargs):
+    """Lists network offerings"""
+
+    cmd = listNetworkOfferings.listNetworkOfferingsCmd()
+    [setattr(cmd, k, v) for k, v in kwargs.items()]
+    return(apiclient.listNetworkOfferings(cmd))
