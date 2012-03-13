@@ -1074,13 +1074,37 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         cmd.id = virtual_router.id
         cmd.state = 'Enabled'
         cls.api_client.configureVirtualRouterElement(cmd)
+        
+        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
+        cmd.id = nsp.id
+        cmd.state = 'Enabled'
+        cls.api_client.updateNetworkServiceProvider(cmd)
+
+        nsp_list = list_nw_service_prividers(
+                                    cls.api_client,
+                                    name='SecurityGroupProvider',
+                                    physicalNetworkId=cls.physical_network.id
+                                    )
+        if isinstance(nsp_list, list):
+            nsp = nsp_list[0]
+        else:
+            raise Exception("List Network Service Providers call failed")
+
+        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
+        cmd.id = nsp.id
+        cmd.state = 'Enabled'
+        cls.api_client.updateNetworkServiceProvider(cmd)
 
         cls.services["network"]["zoneid"] = cls.zone.id
-        # TODO: Find the nw offering
+
         network_offerings = list_network_offerings(
                                                    cls.api_client,                                   
                                                    )
-        cls.services["networkofferingid"]
+        if isinstance(network_offerings, list):
+            cls.services["networkofferingid"] = network_offerings[0]
+        else: 
+            raise Exception("Invalid Network offering ID")
+
         cls.network = Network.create(
                                      cls.api_client, 
                                      cls.services["network"]

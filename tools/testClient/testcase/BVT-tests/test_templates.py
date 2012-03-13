@@ -46,7 +46,6 @@ class Services:
                         "virtual_machine": {
                                     "displayname": "testVM",
                                     "hypervisor": 'XenServer',
-                                    "domainid": 'a63624d2-42ec-49ba-a3d1-9f4ed991a5ce',
                                     "protocol": 'TCP',
                                     "ssh_port": 22,
                                     "username": "root",
@@ -115,6 +114,7 @@ class TestCreateTemplate(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -146,6 +146,7 @@ class TestCreateTemplate(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     mode=cls.services["mode"]
                                     )
@@ -274,6 +275,7 @@ class TestTemplates(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -312,6 +314,7 @@ class TestTemplates(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     mode=cls.services["mode"]
                                     )
@@ -426,7 +429,6 @@ class TestTemplates(cloudstackTestCase):
         cmd.name = new_name
         cmd.bootable = self.services["bootable"]
         cmd.passwordenabled = self.services["passwordenabled"]
-        cmd.ostypeid = self.services["ostypeid"]
 
         self.apiclient.updateTemplate(cmd)
 
