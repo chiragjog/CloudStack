@@ -24,9 +24,6 @@ class Services:
         self.services = {
                             "ostypeid": 12,
                             # Cent OS 5.3 (64 bit)
-                            "zoneid": 1,
-                            # Optional, if specified the mentioned zone will be
-                            # used for tests
                             "mode": 'advanced',
                             # Networking mode: Basic or advanced
                             "lb_switch_wait": 10,
@@ -60,7 +57,6 @@ class Services:
                                     "username": "root",
                                     "password": "password",
                                     "hypervisor": 'XenServer',
-                                    "domainid": 1,
                                     "privateport": 22,
                                     "publicport": 22,
                                     "ssh_port": 22,
@@ -283,6 +279,7 @@ class TestPortForwarding(cloudstackTestCase):
                                     cls.services["server"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                 )
         cls._cleanup = [
@@ -560,6 +557,7 @@ class TestLoadBalancingRule(cloudstackTestCase):
                                     cls.services["server"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.vm_2 = VirtualMachine.create(
@@ -567,6 +565,7 @@ class TestLoadBalancingRule(cloudstackTestCase):
                                     cls.services["server"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.non_src_nat_ip = PublicIPAddress.create(
@@ -1011,6 +1010,7 @@ class TestRebootRouter(cloudstackTestCase):
                                     self.services["server"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
         
@@ -1159,6 +1159,7 @@ class TestAssignRemoveLB(cloudstackTestCase):
                                   self.services["server"],
                                   templateid=template.id,
                                   accountid=self.account.account.name,
+                                  domainid=self.account.account.domainid,
                                   serviceofferingid=self.service_offering.id
                                   )
 
@@ -1167,6 +1168,7 @@ class TestAssignRemoveLB(cloudstackTestCase):
                                 self.services["server"],
                                 templateid=template.id,
                                 accountid=self.account.account.name,
+                                domainid=self.account.account.domainid,
                                 serviceofferingid=self.service_offering.id
                               )
 
@@ -1175,6 +1177,7 @@ class TestAssignRemoveLB(cloudstackTestCase):
                                 self.services["server"],
                                 templateid=template.id,
                                 accountid=self.account.account.name,
+                                domainid=self.account.account.domainid,
                                 serviceofferingid=self.service_offering.id
                               )
 
@@ -1403,6 +1406,7 @@ class TestReleaseIP(cloudstackTestCase):
                                     self.services["server"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
 
@@ -1537,6 +1541,7 @@ class TestDeleteAccount(cloudstackTestCase):
                                     self.services["server"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
 

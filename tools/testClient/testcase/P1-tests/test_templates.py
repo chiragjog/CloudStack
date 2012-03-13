@@ -46,7 +46,6 @@ class Services:
                         "virtual_machine": {
                                     "displayname": "testVM",
                                     "hypervisor": 'XenServer',
-                                    "domainid": 1,
                                     "protocol": 'TCP',
                                     "ssh_port": 22,
                                     "username": "root",
@@ -83,9 +82,6 @@ class Services:
                         "ostypeid": 12,
                         "sleep": 60,
                         "timeout": 10,
-                        "zoneid": 1,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "mode": 'advanced', # Networking mode: Advanced, basic
                      }
 
@@ -228,6 +224,7 @@ class TestCreateTemplate(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     mode=self.services["mode"]
                                     )
@@ -292,6 +289,7 @@ class TestTemplates(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     )
         #Stop virtual machine
@@ -370,6 +368,7 @@ class TestTemplates(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=self.template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     )
         
@@ -564,6 +563,7 @@ class TestTemplates(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     )
         self.cleanup.append(virtual_machine)

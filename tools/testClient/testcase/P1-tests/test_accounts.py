@@ -122,7 +122,6 @@ class Services:
                                     "hypervisor": 'XenServer',
                                     # Hypervisor type should be same as
                                     # hypervisor type of cluster
-                                    "domainid": 1,
                                     "privateport": 22,
                                     "publicport": 22,
                                     "protocol": 'TCP',
@@ -138,12 +137,8 @@ class Services:
                                 "ispublic": True,
                                 "isextractable": True,
                         },
-                        "domainid": 1,
                         "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)
-                        "zoneid": 2,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "sleep": 60,
                         "timeout": 10,
                         "mode":'advanced'
@@ -360,6 +355,7 @@ class TestRemoveUserFromAccount(cloudstackTestCase):
                                   self.apiclient,
                                   self.services["virtual_machine"],
                                   accountid=self.account.account.name,
+                                  domainid=self.account.account.domainid,
                                   serviceofferingid=self.service_offering.id
                                   )
         self.debug("Deployed VM in account: %s, ID: %s" % (
@@ -372,6 +368,7 @@ class TestRemoveUserFromAccount(cloudstackTestCase):
                                   self.apiclient,
                                   self.services["virtual_machine"],
                                   accountid=self.account.account.name,
+                                  domainid=self.account.account.domainid,
                                   serviceofferingid=self.service_offering.id
                                   )
         self.debug("Deployed VM in account: %s, ID: %s" % (
@@ -1172,7 +1169,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
             if isinstance(cleanup_wait, list):
                 time.sleep(cleanup_wait[0].value * 3)
             
-            # Delete Service offerings and subdomains
+            # Delete Service offerings and sub-domains
             cls.service_offering.delete(cls.api_client)
             cls.sub_domain.delete(cls.api_client)
             

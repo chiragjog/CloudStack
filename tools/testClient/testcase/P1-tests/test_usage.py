@@ -42,7 +42,6 @@ class Services:
                         },
                         "volume": {
                                    "diskname": "TestDiskServ",
-                                   "domainid": 1,
                                    },
                         "server": {
                                     "displayname": "TestVM",
@@ -50,7 +49,6 @@ class Services:
                                     "password": "password",
                                     "ssh_port": 22,
                                     "hypervisor": 'XenServer',
-                                    "domainid": 1,
                                     "privateport": 22,
                                     "publicport": 22,
                                     "protocol": 'TCP',
@@ -88,12 +86,8 @@ class Services:
                                    "username": "test",
                                    "password": "test",
                                 },
-                        "domainid": 1,
                         "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)
-                        "zoneid": 1,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "sleep": 60,
                         "timeout": 10,
                         "mode":'advanced'
@@ -135,6 +129,7 @@ class TestVmUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls._cleanup = [
@@ -293,6 +288,7 @@ class TestPublicIPUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
 
@@ -422,6 +418,7 @@ class TestVolumeUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls._cleanup = [
@@ -563,6 +560,7 @@ class TestTemplateUsage(cloudstackTestCase):
                                     cls.services["server"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     mode=cls.services["mode"]
                                     )
@@ -645,6 +643,7 @@ class TestTemplateUsage(cloudstackTestCase):
                          True,
                          "Check DB query result set for valid data"
                          )
+
         self.assertNotEqual(
                             len(qresultset),
                             0,
@@ -814,6 +813,7 @@ class TestLBRuleUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls.public_ip_1 = PublicIPAddress.create(
@@ -950,6 +950,7 @@ class TestSnapshotUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls._cleanup = [
@@ -1088,6 +1089,7 @@ class TestNatRuleUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls.public_ip_1 = PublicIPAddress.create(
@@ -1224,6 +1226,7 @@ class TestVpnUsage(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls.public_ip = PublicIPAddress.create(

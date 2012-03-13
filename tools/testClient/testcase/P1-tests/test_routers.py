@@ -33,16 +33,20 @@ class Services:
                                     {
                                         "displayname": "Test VM",
                                         "username": "root",
-                                        "password": "fr3sca",
+                                        "password": "password",
                                         "ssh_port": 22,
                                         "hypervisor": 'XenServer',
                                         # Hypervisor type should be same as
                                         # hypervisor type of cluster
-                                        "domainid": 1,
                                         "privateport": 22,
                                         "publicport": 22,
                                         "protocol": 'TCP',
                                 },
+                        "host": {
+                                        "username": "root",
+                                        "password": "fr3sca",
+                                        "publicport": 22,
+                            },
                         "account": {
                                         "email": "test@test.com",
                                         "firstname": "Test",
@@ -72,9 +76,6 @@ class Services:
                                     },
                          "ostypeid":12,
                          # Used for Get_Template : CentOS 5.3 (64 bit)
-                         "zoneid": 1,
-                         # Optional, if specified the mentioned zone will be
-                         # used for tests
                          "mode": 'advanced', # Networking mode: Advanced, basic
                         }
 
@@ -110,6 +111,7 @@ class TestRouterServices(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.vm_2 = VirtualMachine.create(
@@ -117,6 +119,7 @@ class TestRouterServices(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -459,6 +462,7 @@ class TestRouterServices(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=self.template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
         self.debug("Deployed a VM with ID: %s" % vm.id)
@@ -581,6 +585,7 @@ class TestRouterStopAssociateIp(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -809,6 +814,7 @@ class TestRouterStopCreatePF(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -1006,6 +1012,7 @@ class TestRouterStopCreateLB(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -1203,6 +1210,7 @@ class TestRouterStopCreateFW(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -1376,9 +1384,9 @@ class TestRouterStopCreateFW(cloudstackTestCase):
         # For DNS and DHCP check 'dnsmasq' process status
         result = get_process_status(
                                 host.ipaddress,
-                                self.services['virtual_machine']["publicport"],
-                                self.vm_1.username,
-                                self.vm_1.password,
+                                self.services['host']["publicport"],
+                                self.services['host']["username"],
+                                self.services['host']["password"],
                                 router.linklocalip,
                                 'iptables -t nat -L'
                                 )

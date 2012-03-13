@@ -66,10 +66,6 @@ class Services:
             "timeout": 10,
             "ostypeid": 12,
             # CentOS 5.3 (64 bit)
-            "domainid": 1,
-            "zoneid": 1,
-            # Optional, if specified the mentioned zone will be
-            # used for tests
             "mode": 'advanced'
             # Networking mode: Basic or Advanced
         }
@@ -82,7 +78,9 @@ class TestCreateIso(cloudstackTestCase):
         self.apiclient = self.testClient.getApiClient()
         self.dbclient = self.testClient.getDbConnection()
         # Get Zone, Domain and templates
+        self.domain = get_domain(self.apiclient, self.services)
         self.zone = get_zone(self.apiclient, self.services)
+        self.services["domainid"] = self.domain.id
         self.services["iso_2"]["zoneid"] = self.zone.id
         
         self.account = Account.create(
@@ -172,7 +170,10 @@ class TestISO(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
+        
+        cls.services["domainid"] = cls.domain.id
         cls.services["iso_1"]["zoneid"] = cls.zone.id
         cls.services["iso_2"]["zoneid"] = cls.zone.id
         cls.services["sourcezoneid"] = cls.zone.id
@@ -259,7 +260,6 @@ class TestISO(cloudstackTestCase):
         cmd.name = new_name
         cmd.bootable = self.services["bootable"]
         cmd.passwordenabled = self.services["passwordenabled"]
-        cmd.ostypeid = self.services["ostypeid"]
 
         self.apiclient.updateIso(cmd)
 

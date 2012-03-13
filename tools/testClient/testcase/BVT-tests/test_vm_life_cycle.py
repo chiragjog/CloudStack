@@ -43,7 +43,6 @@ class Services:
                     "password": "password",
                     "ssh_port": 22,
                     "hypervisor": 'XenServer',
-                    "domainid": 1,
                     "privateport": 22,
                     "publicport": 22,
                     "protocol": 'TCP',
@@ -55,7 +54,6 @@ class Services:
                     "password": "password",
                     "ssh_port": 22,
                     "hypervisor": 'XenServer',
-                    "domainid": 1,
                     "privateport": 22,
                     "publicport": 22,
                     "protocol": 'TCP',
@@ -109,9 +107,6 @@ class Services:
             #Migrate VM to hostid
             "ostypeid": 12,
             # CentOS 5.3 (64-bit)
-            "zoneid": 2,
-            # Optional, if specified the mentioned zone will be
-            # used for tests
             "mode":'advanced',
             # Networking mode: Basic or Advanced
         }
@@ -125,6 +120,7 @@ class TestDeployVM(cloudstackTestCase):
         self.dbclient = self.testClient.getDbConnection()
         self.services = Services().services
         # Get Zone, Domain and templates
+        domain = get_domain(self.apiclient, self.services)
         zone = get_zone(self.apiclient, self.services)
 
         template = get_template(
@@ -169,6 +165,7 @@ class TestDeployVM(cloudstackTestCase):
                                     self.apiclient,
                                     self.services["small"],
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                 )
 
@@ -224,6 +221,7 @@ class TestVMLifeCycle(cloudstackTestCase):
         cls.services = Services().services
 
         # Get Zone, Domain and templates
+        domain = get_domain(cls.api_client, cls.services)
         zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -258,6 +256,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                                         cls.api_client,
                                         cls.services["small"],
                                         accountid=cls.account.account.name,
+                                        domainid=cls.account.account.domainid,
                                         serviceofferingid=cls.small_offering.id,
                                         mode=cls.services["mode"]
                                         )
@@ -265,6 +264,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                                        cls.api_client,
                                        cls.services["medium"],
                                        accountid=cls.account.account.name,
+                                       domainid=cls.account.account.domainid,
                                        serviceofferingid=cls.medium_offering.id,
                                        mode=cls.services["mode"]
                                     )
@@ -272,6 +272,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                                         cls.api_client,
                                         cls.services["small"],
                                         accountid=cls.account.account.name,
+                                        domainid=cls.account.account.domainid,
                                         serviceofferingid=cls.small_offering.id,
                                         mode=cls.services["mode"]
                                         )

@@ -47,7 +47,6 @@ class Services:
                                         "password": "password",
                                         "ssh_port": 22,
                                         "hypervisor": 'XenServer',
-                                        "domainid": 1,
                                         "privateport": 22,
                                         "publicport": 22,
                                         "protocol": 'TCP',
@@ -60,7 +59,6 @@ class Services:
                                         "password": "password",
                                         "ssh_port": 22,
                                         "hypervisor": 'XenServer',
-                                        "domainid": 1,
                                         "privateport": 22,
                                         # For NAT rule creation
                                         "publicport": 22,
@@ -102,9 +100,6 @@ class Services:
                             "username": "root",
                             "password": "password",
                             "ssh_port": 22,
-                            "zoneid": 1,
-                            # Optional, if specified the mentioned zone will be
-                            # used for tests
                             "sleep": 60,
                             "timeout": 10,
                             "mode": 'advanced',
@@ -119,6 +114,7 @@ class TestSnapshotRootDisk(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -126,6 +122,7 @@ class TestSnapshotRootDisk(cloudstackTestCase):
                             cls.zone.id,
                             cls.services["ostypeid"]
                             )
+        cls.services["domainid"] = cls.domain.id
         cls.services["server_without_disk"]["zoneid"] = cls.zone.id
         cls.services["template"] = template.id
         cls.services["zoneid"] = cls.zone.id
@@ -148,6 +145,7 @@ class TestSnapshotRootDisk(cloudstackTestCase):
                                 cls.services["server_without_disk"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id,
                                 mode=cls.services["mode"]
                                 )
@@ -328,6 +326,7 @@ class TestSnapshots(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -338,6 +337,8 @@ class TestSnapshots(cloudstackTestCase):
                             cls.zone.id,
                             cls.services["ostypeid"]
                             )
+        
+        cls.services["domainid"] = cls.domain.id
         cls.services["server_with_disk"]["zoneid"] = cls.zone.id
         cls.services["server_with_disk"]["diskoffering"] = cls.disk_offering.id
 
@@ -365,6 +366,7 @@ class TestSnapshots(cloudstackTestCase):
                                 cls.services["server_with_disk"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id,
                                 mode=cls.services["mode"]
                                 )
@@ -374,6 +376,7 @@ class TestSnapshots(cloudstackTestCase):
                                     cls.services["server_without_disk"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     mode=cls.services["mode"]
                                     )
@@ -1055,6 +1058,7 @@ class TestSnapshots(cloudstackTestCase):
                                     self.services["server_without_disk"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     mode=self.services["mode"]
                                     )

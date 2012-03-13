@@ -50,7 +50,6 @@ class Services:
                                     "password": "password",
                                     "ssh_port": 22,
                                     "hypervisor": 'XenServer',
-                                    "domainid": 1,
                                     "privateport": 22,
                                     "publicport": 22,
                                     "protocol": 'TCP',
@@ -87,9 +86,6 @@ class Services:
                         },
                         "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)                        
-                        "zoneid": 1,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "sleep":60,
                         "mode": 'advanced',
                         # Networking mode, Advanced, Basic
@@ -136,6 +132,7 @@ class TestSnapshots(cloudstackTestCase):
                                 cls.services["virtual_machine"],
                                 templateid=cls.template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id,
                                 mode=cls.services["mode"]
                                 )
@@ -309,6 +306,7 @@ class TestSnapshots(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=self.template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     mode=self.services["mode"]
                                 )
@@ -499,6 +497,7 @@ class TestTemplate(cloudstackTestCase):
                                  self.services["virtual_machine"],
                                  templateid=template.id,
                                  accountid=self.account.account.name,
+                                 domainid=self.account.account.domainid,
                                  serviceofferingid=self.service_offering.id,
                                  )
         self.debug("Deployed VM with ID: %s " % virtual_machine.id)
@@ -541,6 +540,7 @@ class TestNATRules(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                 )
         cls.public_ip = PublicIPAddress.create(
@@ -832,6 +832,7 @@ class TestRouterRestart(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -960,6 +961,7 @@ class TestTemplates(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     )
         #Stop virtual machine

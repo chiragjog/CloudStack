@@ -16,6 +16,21 @@ from base import *
 #Import System modules
 import time
 
+def get_domain(apiclient, services=None):
+    "Returns a default domain"
+
+    cmd = listDomains.listDomainsCmd()
+    if services:
+        if "domainid" in services:
+            cmd.id = services["domainid"]
+    
+    domains = apiclient.listDomains(cmd)
+    
+    if isinstance(domains, list):
+        return domains[0]
+    else:
+        raise Exception("Failed to find specified domain.") 
+
 def get_zone(apiclient, services=None):
     "Returns a default zone"
 

@@ -36,7 +36,6 @@ class Services:
                                         "password": "fr3sca",
                                         "ssh_port": 22,
                                         "hypervisor": 'XenServer',
-                                        "domainid": 1,
                                         "privateport": 22,
                                         "publicport": 22,
                                         "protocol": 'TCP',
@@ -51,9 +50,6 @@ class Services:
                          "ostypeid":12,
                          "sleep": 60,
                          "timeout": 10,
-                         "zoneid": 1,
-                         # Optional, if specified the mentioned zone will be
-                         # used for tests
                          "mode": 'advanced', #Networking mode: Basic, Advanced
                         }
 
@@ -66,6 +62,7 @@ class TestRouterServices(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -88,6 +85,7 @@ class TestRouterServices(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
