@@ -47,13 +47,11 @@ class Services:
                         },
                         "volume": {
                                 "diskname": "TestDiskServ",
-                                "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                 "max": 6,
                         },
                          "virtual_machine": {
                                     "displayname": "testVM",
                                     "hypervisor": 'XenServer',
-                                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                     "protocol": 'TCP',
                                     "ssh_port": 22,
                                     "username": "root",
@@ -67,14 +65,10 @@ class Services:
                           "name": "testISO",
                           "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                           # Source URL where ISO is located
-                          "ostypeid": '5a5b5f64-de08-452d-9672-608a4946f754',
+                          "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                           },
                         "sleep": 50,
-                        "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
-                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
-                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         "mode": 'advanced',
                     }
 
@@ -116,6 +110,7 @@ class TestAttachVolume(cloudstackTestCase):
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                 )
         cls._cleanup = [
@@ -148,6 +143,7 @@ class TestAttachVolume(cloudstackTestCase):
                                    self.services["volume"],
                                    zoneid=self.zone.id,
                                    account=self.account.account.name,
+                                   domainid=self.account.account.domainid,
                                    diskofferingid=self.disk_offering.id
                                    )
             self.debug("Created volume: %s for account: %s" % (
@@ -295,6 +291,7 @@ class TestAttachVolume(cloudstackTestCase):
                                 self.services["volume"],
                                 zoneid=self.zone.id,
                                 account=self.account.account.name,
+                                domainid=self.account.account.domainid,
                                 diskofferingid=self.disk_offering.id
                                )
         self.debug("Created volume: %s for account: %s" % (
@@ -380,6 +377,7 @@ class TestAttachDetachVolume(cloudstackTestCase):
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                 )
         cls._cleanup = [
@@ -427,6 +425,7 @@ class TestAttachDetachVolume(cloudstackTestCase):
                                    self.services["volume"],
                                    zoneid=self.zone.id,
                                    account=self.account.account.name,
+                                   domainid=self.account.account.domainid,
                                    diskofferingid=self.disk_offering.id
                                    )
             self.debug("Created volume: %s for account: %s" % (
@@ -621,6 +620,7 @@ class TestAttachVolumeISO(cloudstackTestCase):
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                 )
         cls._cleanup = [
@@ -666,6 +666,7 @@ class TestAttachVolumeISO(cloudstackTestCase):
                                    self.services["volume"],
                                    zoneid=self.zone.id,
                                    account=self.account.account.name,
+                                   domainid=self.account.account.domainid,
                                    diskofferingid=self.disk_offering.id
                                    )
             self.debug("Created volume: %s for account: %s" % (
@@ -807,6 +808,7 @@ class TestVolumes(cloudstackTestCase):
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                 )
 
@@ -815,6 +817,7 @@ class TestVolumes(cloudstackTestCase):
                                    cls.services["volume"],
                                    zoneid=cls.zone.id,
                                    account=cls.account.account.name,
+                                   domainid=cls.account.account.domainid,
                                    diskofferingid=cls.disk_offering.id
                                    )
         cls._cleanup = [

@@ -39,9 +39,10 @@ class Services:
                                  },
                          "physical_network": {
                                   "name" : "Physical network 1",
-                                  "broadcastdomainrange": "Pod",
-                                  "domainid": '0ec2220b-3a73-435b-abad-eb5860186421',
-                                  "isolationmethods": 'VLAN'          
+                                },
+                         "network": {
+                                     "name": 'guestNetworkForBasicZone',
+                                     "displaytext": 'guestNetworkForBasicZone',
                                 },
                          "public_ip": {
                                  "gateway": '192.168.100.1',
@@ -128,7 +129,6 @@ class Services:
                                     "hypervisor": 'XenServer',
                                     # Hypervisor type should be same as
                                     # hypervisor type of cluster
-                                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                     "privateport": 22,
                                     "publicport": 22,
                                     "protocol": 'TCP',
@@ -136,7 +136,7 @@ class Services:
                          "template": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '0d4603b0-962a-4baf-8e41-3bc3d77d19bf',
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                 "hypervisor": 'XenServer',
                                 "format" : 'VHD',
@@ -144,12 +144,8 @@ class Services:
                                 "ispublic": True,
                                 "isextractable": True,
                         },
-                        "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
-                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         # Cent OS 5.3 (64 bit)
-                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "sleep": 60,
                         "timeout": 10,
                         "mode":'advanced'
@@ -366,6 +362,7 @@ class TestRemoveUserFromAccount(cloudstackTestCase):
                                   self.apiclient,
                                   self.services["virtual_machine"],
                                   accountid=self.account.account.name,
+                                  domainid=self.account.account.domainid,
                                   serviceofferingid=self.service_offering.id
                                   )
         self.debug("Deployed VM in account: %s, ID: %s" % (
@@ -378,6 +375,7 @@ class TestRemoveUserFromAccount(cloudstackTestCase):
                                   self.apiclient,
                                   self.services["virtual_machine"],
                                   accountid=self.account.account.name,
+                                  domainid=self.account.account.domainid,
                                   serviceofferingid=self.service_offering.id
                                   )
         self.debug("Deployed VM in account: %s, ID: %s" % (
@@ -1041,11 +1039,58 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                                 cls.services["physical_network"],
                                                 cls.zone.id
                                                 )
+        cls.physical_network.addTrafficType(
+                                            cls.api_client, 
+                                            type='Guest'
+                                            )
+        cls.physical_network.addTrafficType(
+                                            cls.api_client,
+                                            type='Management'
+                                            )
+        cls.physical_network.update(
+                                    cls.api_client,
+                                    state='Enabled'
+                                    )
+        nsp_list = list_nw_service_prividers(
+                                    cls.api_client,
+                                    name='VirtualRouter',
+                                    physicalNetworkId=cls.physical_network.id
+                                    )
+        if isinstance(nsp_list, list):
+            nsp = nsp_list[0]
+        else:
+            raise Exception("List Network Service Providers call failed")
+
+        virtual_routers = list_virtual_router_elements(
+                                                       cls.api_client,
+                                                       nspid=nsp.id
+                                                    )
+        if isinstance(virtual_routers, list):
+            virtual_router = virtual_routers[0]
+        else:
+            raise Exception("List virtual routers call failed")
+
+        cmd = configureVirtualRouterElement.configureVirtualRouterElementCmd()
+        cmd.id = virtual_router.id
+        cmd.state = 'Enabled'
+        cls.api_client.configureVirtualRouterElement(cmd)
+
+        cls.services["network"]["zoneid"] = cls.zone.id
+        # TODO: Find the nw offering
+        network_offerings = list_network_offerings(
+                                                   cls.api_client,                                   
+                                                   )
+        cls.services["networkofferingid"]
+        cls.network = Network.create(
+                                     cls.api_client, 
+                                     cls.services["network"]
+                                     )
 
         cls.public_ip_range = PublicIpRange.create(
                                               cls.api_client,
                                               cls.services["public_ip"]
                                               )
+ 
         cls.services["cluster"]["zoneid"] = cls.zone.id
         cls.services["cluster"]["podid"] = cls.pod.id
 
@@ -1184,7 +1229,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
             if isinstance(cleanup_wait, list):
                 time.sleep(cleanup_wait[0].value * 3)
             
-            # Delete Service offerings and subdomains
+            # Delete Service offerings and sub-domains
             cls.service_offering.delete(cls.api_client)
             cls.sub_domain.delete(cls.api_client)
             

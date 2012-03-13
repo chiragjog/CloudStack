@@ -38,7 +38,6 @@ class Services:
                                         "hypervisor": 'XenServer',
                                         # Hypervisor type should be same as
                                         # hypervisor type of cluster
-                                        "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                         "privateport": 22,
                                         "publicport": 22,
                                         "protocol": 'TCP',
@@ -70,11 +69,8 @@ class Services:
                                     "cidr": '55.55.0.0/11',
                                     # Any network (For creating FW rule
                                     },
-                         "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                         "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                          # Used for Get_Template : CentOS 5.3 (64 bit)
-                         "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
-                         # Optional, if specified the mentioned zone will be
-                         # used for tests
                          "mode": 'advanced', # Networking mode: Advanced, basic
                         }
 
@@ -110,6 +106,7 @@ class TestRouterServices(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.vm_2 = VirtualMachine.create(
@@ -117,6 +114,7 @@ class TestRouterServices(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -454,6 +452,7 @@ class TestRouterServices(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=self.template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
         self.debug("Deployed a VM with ID: %s" % vm.id)
@@ -576,6 +575,7 @@ class TestRouterStopAssociateIp(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -804,6 +804,7 @@ class TestRouterStopCreatePF(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -958,7 +959,7 @@ class TestRouterStopCreatePF(cloudstackTestCase):
                     "Check list port forwarding rules"
                     )
         try:
-            
+
             self.debug("SSH into VM with ID: %s" % nat_rule.ipaddress)
             
             self.vm_1.ssh_port = nat_rule.publicport
@@ -1002,6 +1003,7 @@ class TestRouterStopCreateLB(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [
@@ -1199,6 +1201,7 @@ class TestRouterStopCreateFW(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls.cleanup = [

@@ -46,7 +46,6 @@ class Services:
                         "virtual_machine": {
                                     "displayname": "testVM",
                                     "hypervisor": 'XenServer',
-                                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                     "protocol": 'TCP',
                                     "ssh_port": 22,
                                     "username": "root",
@@ -63,7 +62,7 @@ class Services:
                             0:{
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '0d4603b0-962a-4baf-8e41-3bc3d77d19bf',
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                 "hypervisor": 'XenServer',
                                 "format" : 'VHD',
@@ -75,17 +74,14 @@ class Services:
                         "template": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "templatefilter": 'self',
                         },
                         "templatefilter": 'self',
                         "destzoneid": 2, # For Copy template (Destination zone)
-                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         "sleep": 60,
                         "timeout": 10,
-                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "mode": 'advanced', # Networking mode: Advanced, basic
                      }
 
@@ -228,6 +224,7 @@ class TestCreateTemplate(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     mode=self.services["mode"]
                                     )
@@ -292,6 +289,7 @@ class TestTemplates(cloudstackTestCase):
                                     cls.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
                                     serviceofferingid=cls.service_offering.id,
                                     )
         #Stop virtual machine
@@ -371,6 +369,7 @@ class TestTemplates(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=self.template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     )
         
@@ -566,6 +565,7 @@ class TestTemplates(cloudstackTestCase):
                                     self.services["virtual_machine"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id,
                                     )
         self.cleanup.append(virtual_machine)

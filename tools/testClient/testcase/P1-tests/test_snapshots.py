@@ -45,7 +45,6 @@ class Services:
                                     "password": "password",
                                     "ssh_port": 22,
                                     "hypervisor": 'XenServer',
-                                    "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
                                     "privateport": 22,
                                     "publicport": 22,
                                     "protocol": 'TCP',
@@ -67,13 +66,12 @@ class Services:
                         "templates": {
                                     "displaytext": 'Template',
                                     "name": 'Template',
-                                    "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                     "templatefilter": 'self',
                                 },
                         "diskdevice": "/dev/xvda",
                         "diskname": "TestDiskServ",
                         "size": 1, # GBs
-                        "domainid": '9ee36d2e-8b8f-432e-a927-a678ebec1d6b',
 
                         "mount_dir": "/mnt/tmp",
                         "sub_dir": "test",
@@ -81,11 +79,8 @@ class Services:
                         "sub_lvl_dir2": "test2",
                         "random_data": "random.data",
 
-                        "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         # Cent OS 5.3 (64 bit)
-                        "zoneid": '4a6c0290-e64d-40fc-afbb-4a05cab6fa4b',
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "sleep": 60,
                         "timeout": 10,
                         "mode" : 'advanced', # Networking mode: Advanced, Basic
@@ -99,6 +94,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         cls.template = get_template(
@@ -106,6 +102,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
                             cls.zone.id,
                             cls.services["ostypeid"]
                             )
+        cls.services["domainid"] = cls.domain.id
         cls.services["server"]["zoneid"] = cls.zone.id
 
         cls.services["template"] = cls.template.id
@@ -176,6 +173,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
                                 self.services["server"],
                                 templateid=self.template.id,
                                 accountid=self.account.account.name,
+                                domainid=self.account.account.domainid,
                                 serviceofferingid=self.service_offering.id
                                 )
         self.debug("Created VM with ID: %s" % self.virtual_machine.id)
@@ -265,6 +263,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
                                     self.services["server"],
                                     templateid=template.id,
                                     accountid=self.account.account.name,
+                                    domainid=self.account.account.domainid,
                                     serviceofferingid=self.service_offering.id
                                     )
         self.debug("Created VM with ID: %s from template: %s" % (
@@ -381,6 +380,7 @@ class TestAccountSnapshotClean(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -409,6 +409,7 @@ class TestAccountSnapshotClean(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         # Get the Root disk of VM 
@@ -690,7 +691,9 @@ class TestSnapshotDetachedDisk(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
+        
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
                                     cls.services["disk_offering"]
@@ -722,6 +725,7 @@ class TestSnapshotDetachedDisk(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id,
                                 mode=cls.services["mode"]
                                 )
@@ -960,6 +964,7 @@ class TestSnapshotLimit(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -988,6 +993,7 @@ class TestSnapshotLimit(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
         cls._cleanup = [
@@ -1203,6 +1209,7 @@ class TestSnapshotEvents(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -1231,6 +1238,7 @@ class TestSnapshotEvents(cloudstackTestCase):
                                 cls.services["server"],
                                 templateid=template.id,
                                 accountid=cls.account.account.name,
+                                domainid=cls.account.account.domainid,
                                 serviceofferingid=cls.service_offering.id
                                 )
 
