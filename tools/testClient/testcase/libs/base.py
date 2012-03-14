@@ -1262,6 +1262,15 @@ class Zone:
         cmd.id = self.id
         apiclient.deleteZone(cmd)
 
+    def update(self, apiclient, **kwargs):
+        """Update the zone"""
+        
+        cmd = updateZone.updateZoneCmd()
+        cmd.id = self.id
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return apiclient.updateZone(cmd)
+        
+        
     @classmethod
     def list(cls, apiclient, **kwargs):
         """List all Zones matching criteria"""
@@ -1375,15 +1384,14 @@ class PhysicalNetwork:
         self.__dict__.update(items)
 
     @classmethod
-    def create(cls, apiclient, services, zoneid):
+    def create(cls, apiclient, services, zoneid, domainid=None):
         """Create physical network"""
         cmd = createPhysicalNetwork.createPhysicalNetworkCmd()
 
         cmd.name = services["name"]
         cmd.zoneid = zoneid
-        cmd.broadcastdomainrange = services["broadcastdomainrange"]
-        cmd.domainid = services["domainid"]
-        cmd.isolationmethods = services["isolationmethods"]
+        if domainid:
+            cmd.domainid = domainid
         return PhysicalNetwork(apiclient.createPhysicalNetwork(cmd).__dict__)
 
     def delete(self, apiclient):
@@ -1393,6 +1401,21 @@ class PhysicalNetwork:
         cmd.id = self.id
         apiclient.deletePhysicalNetwork(cmd)
 
+    def update(self, apiclient, **kwargs):
+        """Update Physical network state"""
+        
+        cmd = updatePhysicalNetwork.updatePhysicalNetworkCmd()
+        cmd.id = self.id
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return apiclient.updatePhysicalNetwork(cmd)
+        
+    def addTrafficType(self, apiclient, type):
+        """Add Traffic type to Physical network"""
+        
+        cmd = addTrafficType.addTrafficTypeCmd()
+        cmd.physicalnetworkid = self.id
+        cmd.traffictype = type
+        return apiclient.addTrafficType(cmd)
 
 class SecurityGroup:
     """Manage Security Groups"""

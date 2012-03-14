@@ -26,7 +26,7 @@ class Services:
                         "zone": {
                                  "dns1": '121.242.190.180',
                                  "internaldns1": '192.168.100.1',
-                                 "name" : "Test Zone",
+                                 "name" : "Basic test",
                                  "networktype" : "Basic",
                                  "dns2": '121.242.190.211',
                                  },
@@ -73,11 +73,11 @@ class Services:
 
                          "primary_storage": {
                                 "name": "Test Primary",
-                                "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo1",
+                                "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo3",
                                 # Format: File_System_Type/Location/Path
                             },
                         "sec_storage": {
-                                 "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo1"
+                                 "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo4"
                                  # Format: File_System_Type/Location/Path
 
 
@@ -746,7 +746,6 @@ class TestServiceOfferingSiblings(cloudstackTestCase):
                     )
         return
 
-
 @unittest.skip("Open Questions")
 class TestServiceOfferingHierarchy(cloudstackTestCase):
 
@@ -1007,7 +1006,7 @@ class TesttemplateHierarchy(cloudstackTestCase):
             )
         return
 
-@unittest.skip("Open Questions")
+@unittest.skip("Problem in cleanup")
 class TestAddVmToSubDomain(cloudstackTestCase):
 
     @classmethod
@@ -1037,7 +1036,8 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         cls.physical_network = PhysicalNetwork.create(
                                                 cls.api_client, 
                                                 cls.services["physical_network"],
-                                                cls.zone.id
+                                                cls.zone.id,
+                                                cls.domain.id
                                                 )
         cls.physical_network.addTrafficType(
                                             cls.api_client, 
@@ -1072,7 +1072,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
 
         cmd = configureVirtualRouterElement.configureVirtualRouterElementCmd()
         cmd.id = virtual_router.id
-        cmd.state = 'Enabled'
+        cmd.enabled = True
         cls.api_client.configureVirtualRouterElement(cmd)
         
         cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
@@ -1095,16 +1095,15 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         cmd.state = 'Enabled'
         cls.api_client.updateNetworkServiceProvider(cmd)
 
-        cls.services["network"]["zoneid"] = cls.zone.id
-
         network_offerings = list_network_offerings(
                                                    cls.api_client,                                   
                                                    )
         if isinstance(network_offerings, list):
-            cls.services["networkofferingid"] = network_offerings[0]
+            cls.services["network"]["networkoffering"] = network_offerings[0].id
         else: 
             raise Exception("Invalid Network offering ID")
 
+        cls.services["network"]["zoneid"] = cls.zone.id
         cls.network = Network.create(
                                      cls.api_client, 
                                      cls.services["network"]
@@ -1154,6 +1153,13 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                         cls.api_client,
                                         cls.services["sec_storage"]
                                         )
+        
+        # Enable the zone
+        
+        cls.zone.update(
+                        cls.api_client,
+                        allocationstate='Enabled'
+                        )
         # After adding Host, Clusters wait for SSVMs to come up
         wait_for_ssvms(
                        cls.api_client,
@@ -1166,7 +1172,11 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     systemvmtype='secondarystoragevm',
                                     hostid=cls.host.id
                                 )
-        ssvm = ssvm_response[0]
+        if isinstance(ssvm_response, list):
+            ssvm = ssvm_response[0]
+        else:
+            raise Exception("List SSVM failed")
+        
         # Download BUILTIN templates
         download_builtin_templates(
                                    cls.api_client,
@@ -1207,7 +1217,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                             cls.zone.id,
                             cls.services["ostypeid"]
                             )
-
+        cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.vm_1 = VirtualMachine.create(
                                     cls.api_client,
                                     cls.services["virtual_machine"],
@@ -1216,25 +1226,16 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     domainid=cls.account_1.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
-        cls.sub_domain_path = str(cls.account_1.account.domainid) + '/' + \
-                                str(cls.account_2.account.domainid)
+
         cls.vm_2 = VirtualMachine.create(
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account_2.account.name,
-                                    domainid=cls.sub_domain_path,
+                                    domainid=cls.account_2.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls._cleanup = [
-                        cls.service_offering,
-                        cls.sub_domain,
-                        cls.secondary_storage,
-                        cls.primary_storage,
-                        cls.host,
-                        cls.cluster,
-                        cls.pod,
-                        cls.zone
                         ]
         return
 
@@ -1249,14 +1250,22 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                           cls.api_client,
                                           name='account.cleanup.interval'
                                           )
+            print cleanup_wait
+            print type(cleanup_wait)
             # Sleep for account.cleanup.interval*3
             if isinstance(cleanup_wait, list):
-                time.sleep(cleanup_wait[0].value * 3)
+                sleep_time = int(cleanup_wait[0].value) * 3
+            
+            time.sleep(sleep_time)
             
             # Delete Service offerings and sub-domains
             cls.service_offering.delete(cls.api_client)
             cls.sub_domain.delete(cls.api_client)
-            
+
+            # Enable maintenance mode of 
+            cls.host.enableMaintenance(cls.api_client)
+            cls.primary_storage.enableMaintenance(cls.api_client)
+
             # Destroy SSVMs and wait for volumes to cleanup 
             ssvms = list_ssvms(
                                cls.api_client,
@@ -1269,19 +1278,23 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                     cmd.id = ssvm.id
                     cls.api_client.destroySystemVm(cmd)
 
-            # Sleep for account.cleanup.interval*3 to wait for SSVM volumee
+            # Sleep for account.cleanup.interval*3 to wait for SSVM volume
             # to cleanup
-            if isinstance(cleanup_wait, list):
-                time.sleep(cleanup_wait[0].value * 3)
+            time.sleep(sleep_time)
 
             # Cleanup Primary, secondary storage, hosts, zones etc.
             cls.secondary_storage.delete(cls.api_client)
-            cls.primary_storage.delete(cls.api_client)
+            
             cls.host.delete(cls.api_client)
+            cls.primary_storage.delete(cls.api_client)
+            
+            cls.network.delete(cls.api_client)
             cls.cluster.delete(cls.api_client)
-            cls.pod.delete(cls.api_client)
+            
             cls.physical_network.delete(cls.api_client)
+            cls.pod.delete(cls.api_client)
             cls.zone.delete(cls.api_client)
+
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return

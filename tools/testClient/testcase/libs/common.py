@@ -130,7 +130,7 @@ def download_systemplates_sec_storage(server, services):
 def wait_for_ssvms(apiclient, zoneid, podid):
     """After setup wait for SSVMs to come Up"""
 
-    time.sleep(30)
+    time.sleep(60)
     timeout = 40
     while True:
             list_ssvm_response = list_ssvms(
@@ -147,7 +147,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
             elif ssvm.state == 'Running':
                 break
             elif timeout == 0:
-                raise Exception("SSVM failled to come up")
+                raise Exception("SSVM failed to come up")
                 break
 
     timeout = 20
@@ -166,7 +166,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
             elif cpvm.state == 'Running':
                 break
             elif timeout == 0:
-                raise Exception("SSVM failled to come up")
+                raise Exception("CPVM failed to come up")
                 break
     return
 
@@ -182,7 +182,7 @@ def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip)
                                 linklocalip,
                                 "iptables -P INPUT ACCEPT"
                             )
-
+    time.sleep(60)
     # Find the BUILTIN Templates for given Zone, Hypervisor
     list_template_response = list_templates(
                                     apiclient,
@@ -217,7 +217,9 @@ def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip)
         # Error - Any other string 
         if template.status == 'Download Complete'  :
             break
-        elif 'Downloaded' not in template.status.split():
+        elif 'Downloaded' not in template.status.split() or \
+                     'Installing' not in template.status.split():
+            
             raise Exception("ErrorInDownload")
         elif 'Downloaded' in template.status.split():
             time.sleep(30)
