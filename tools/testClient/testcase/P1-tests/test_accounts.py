@@ -34,15 +34,15 @@ class Services:
                                  "name": "Test Pod",
                                  "gateway": '192.168.100.1',
                                  "netmask": '255.255.255.0',
-                                 "startip": '192.168.100.136',
-                                 "endip": '192.168.100.141',
+                                 "startip": '192.168.100.132',
+                                 "endip": '192.168.100.140',
                                  },
                          "public_ip": {
                                  "gateway": '192.168.100.1',
                                  "netmask": '255.255.255.0',
                                  "forvirtualnetwork": False,
-                                 "startip": '192.168.100.136',
-                                 "endip": '192.168.100.141',
+                                 "startip": '192.168.100.142',
+                                 "endip": '192.168.100.149',
                                  "vlan": "untagged",
                                  },
                          "cluster": {
@@ -66,11 +66,11 @@ class Services:
 
                          "primary_storage": {
                                 "name": "Test Primary",
-                                "url": "nfs://192.168.100.131/Primary3",
+                                "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo3",
                                 # Format: File_System_Type/Location/Path
                             },
                         "sec_storage": {
-                                 "url": "nfs://192.168.100.131/SecStorage"
+                                 "url": "nfs://192.168.100.150/mnt/DroboFS/Shares/nfsclo4"
                                  # Format: File_System_Type/Location/Path
 
 
@@ -83,7 +83,7 @@ class Services:
                         },
                         "sysVM": {
                                         "mnt_dir": '/mnt/test',
-                                        "sec_storage": '192.168.100.131',
+                                        "sec_storage": '192.168.100.150',
                                         "path": 'TestSec',
                                         "command": '/usr/lib64/cloud/agent/scripts/storage/secondary/cloud-install-sys-tmplt',
                                         "download_url": 'http://download.cloud.com/releases/2.2.0/systemvm.vhd.bz2',
@@ -739,7 +739,6 @@ class TestServiceOfferingSiblings(cloudstackTestCase):
                     )
         return
 
-
 @unittest.skip("Open Questions")
 class TestServiceOfferingHierarchy(cloudstackTestCase):
 
@@ -1000,7 +999,7 @@ class TesttemplateHierarchy(cloudstackTestCase):
             )
         return
 
-@unittest.skip("Open Questions")
+@unittest.skip("Open questions")
 class TestAddVmToSubDomain(cloudstackTestCase):
 
     @classmethod
@@ -1082,7 +1081,11 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     systemvmtype='secondarystoragevm',
                                     hostid=cls.host.id
                                 )
-        ssvm = ssvm_response[0]
+        if isinstance(ssvm_response, list):
+            ssvm = ssvm_response[0]
+        else:
+            raise Exception("List SSVM failed")
+        
         # Download BUILTIN templates
         download_builtin_templates(
                                    cls.api_client,
@@ -1123,7 +1126,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                             cls.zone.id,
                             cls.services["ostypeid"]
                             )
-
+        cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.vm_1 = VirtualMachine.create(
                                     cls.api_client,
                                     cls.services["virtual_machine"],
@@ -1132,25 +1135,16 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     domainid=cls.account_1.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
-        cls.sub_domain_path = str(cls.account_1.account.domainid) + '/' + \
-                                str(cls.account_2.account.domainid)
+
         cls.vm_2 = VirtualMachine.create(
                                     cls.api_client,
                                     cls.services["virtual_machine"],
                                     templateid=cls.template.id,
                                     accountid=cls.account_2.account.name,
-                                    domainid=cls.sub_domain_path,
+                                    domainid=cls.account_2.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
         cls._cleanup = [
-                        cls.service_offering,
-                        cls.sub_domain,
-                        cls.secondary_storage,
-                        cls.primary_storage,
-                        cls.host,
-                        cls.cluster,
-                        cls.pod,
-                        cls.zone
                         ]
         return
 
@@ -1167,12 +1161,18 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                           )
             # Sleep for account.cleanup.interval*3
             if isinstance(cleanup_wait, list):
-                time.sleep(cleanup_wait[0].value * 3)
+                sleep_time = int(cleanup_wait[0].value) * 3
+            
+            time.sleep(sleep_time)
             
             # Delete Service offerings and sub-domains
             cls.service_offering.delete(cls.api_client)
             cls.sub_domain.delete(cls.api_client)
-            
+
+            # Enable maintenance mode of 
+            cls.host.enableMaintenance(cls.api_client)
+            cls.primary_storage.enableMaintenance(cls.api_client)
+
             # Destroy SSVMs and wait for volumes to cleanup 
             ssvms = list_ssvms(
                                cls.api_client,
@@ -1185,15 +1185,15 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                     cmd.id = ssvm.id
                     cls.api_client.destroySystemVm(cmd)
 
-            # Sleep for account.cleanup.interval*3 to wait for SSVM volumee
+            # Sleep for account.cleanup.interval*3 to wait for SSVM volume
             # to cleanup
-            if isinstance(cleanup_wait, list):
-                time.sleep(cleanup_wait[0].value * 3)
+            time.sleep(sleep_time)
 
             # Cleanup Primary, secondary storage, hosts, zones etc.
             cls.secondary_storage.delete(cls.api_client)
-            cls.primary_storage.delete(cls.api_client)
             cls.host.delete(cls.api_client)
+            
+            cls.primary_storage.delete(cls.api_client)
             cls.cluster.delete(cls.api_client)
             cls.pod.delete(cls.api_client)
             cls.zone.delete(cls.api_client)
