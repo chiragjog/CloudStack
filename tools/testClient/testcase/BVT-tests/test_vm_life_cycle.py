@@ -95,7 +95,7 @@ class Services:
                     "name": "testISO",
                     "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                      # Source URL where ISO is located
-                    "ostypeid": 12,
+                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                     "mode": 'HTTP_DOWNLOAD', # Downloading existing ISO 
                 },
             "diskdevice": '/dev/xvdd',
@@ -105,7 +105,7 @@ class Services:
             "timeout": 10,
             "hostid": 5,
             #Migrate VM to hostid
-            "ostypeid": 12,
+            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
             # CentOS 5.3 (64-bit)
             "mode":'advanced',
             # Networking mode: Basic or Advanced
@@ -139,7 +139,8 @@ class TestDeployVM(cloudstackTestCase):
         # Create Account, VMs, NAT Rules etc
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=domain.id
                             )
 
         self.service_offering = ServiceOffering.create(
@@ -239,7 +240,8 @@ class TestVMLifeCycle(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=domain.id
                             )
 
         cls.small_offering = ServiceOffering.create(
@@ -323,7 +325,7 @@ class TestVMLifeCycle(cloudstackTestCase):
         self.assertNotEqual(
                             len(list_vm_response),
                             0,
-                            "Check VM avaliable in List Virtual Machines"
+                            "Check VM available in List Virtual Machines"
                         )
 
         self.assertEqual(

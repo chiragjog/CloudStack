@@ -60,7 +60,7 @@ class Services:
                         "publicport": 22,
                         "protocol": 'TCP',
                         "diskdevice": "/dev/xvdb",
-                        "ostypeid": 12,
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         "mode": 'advanced',
                         "sleep": 60,
                         "timeout": 10,
@@ -99,7 +99,8 @@ class TestCreateVolume(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -280,7 +281,8 @@ class TestVolumes(cloudstackTestCase):
         # Create VMs, VMs etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -471,10 +473,10 @@ class TestVolumes(cloudstackTestCase):
             fd.write(response.read())
             fd.close()
 
-        except Exception as e:
+        except Exception:
             self.fail(
-                "Extract Volume Failed with invalid URL %s (vol id: %s) Error: %s" \
-                % (extract_vol.url, self.volume.id, e)
+                "Extract Volume Failed with invalid URL %s (vol id: %s)" \
+                % (extract_vol.url, self.volume.id)
             )
 
     def test_07_delete_detached_volume(self):

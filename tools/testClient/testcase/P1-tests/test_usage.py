@@ -56,7 +56,7 @@ class Services:
                         "templates": {
                                     "displaytext": 'Template',
                                     "name": 'Template',
-                                    "ostypeid": 12,
+                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                     "templatefilter": 'self',
                                     "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.qcow2.bz2"
                                 },
@@ -68,7 +68,7 @@ class Services:
                                   "isextractable": True,
                                   "isfeatured": True,
                                   "ispublic": True,
-                                  "ostypeid": 12,
+                                  "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 },
                         "lbrule": {
                                    "name": "SSH",
@@ -86,7 +86,7 @@ class Services:
                                    "username": "test",
                                    "password": "test",
                                 },
-                        "ostypeid": 12,
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         # Cent OS 5.3 (64 bit)
                         "sleep": 60,
                         "timeout": 10,
@@ -101,6 +101,7 @@ class TestVmUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -116,6 +117,7 @@ class TestVmUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -183,12 +185,34 @@ class TestVmUsage(cloudstackTestCase):
         self.debug("Destroying the VM: %s" % self.virtual_machine.id)
         self.virtual_machine.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
+                        )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
                         )
         self.assertEqual(
                          isinstance(qresultset, list),
@@ -260,6 +284,7 @@ class TestPublicIPUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -275,6 +300,7 @@ class TestPublicIPUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -345,13 +371,35 @@ class TestPublicIPUsage(cloudstackTestCase):
         # Release one of the IP
         self.public_ip.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+        
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
@@ -387,6 +435,7 @@ class TestVolumeUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -405,6 +454,7 @@ class TestVolumeUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -470,7 +520,8 @@ class TestVolumeUsage(cloudstackTestCase):
         volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK'
+                                    type='DATADISK',
+                                    listall=True
                                     )
         self.assertEqual(
                          isinstance(volume_response, list), 
@@ -492,26 +543,47 @@ class TestVolumeUsage(cloudstackTestCase):
         cmd.id = data_volume.id
         self.apiclient.deleteVolume(cmd)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
-
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
                          "Check DB query result set for valid data"
                          )
-
+        
         self.assertNotEqual(
                             len(qresultset),
                             0,
                             "Check DB Query result set"
                             )
+        qresult = qresultset[0]
 
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+                
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
         qresult = str(qresultset)
         self.debug("Query result: %s" % qresult)
         # Check VOLUME.CREATE, VOLUME.DESTROY events in cloud.usage_event table
@@ -536,6 +608,7 @@ class TestTemplateUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["server"]["zoneid"] = cls.zone.id
         template = get_template(
@@ -546,7 +619,8 @@ class TestTemplateUsage(cloudstackTestCase):
         cls.services["server"]["zoneid"] = cls.zone.id
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -573,7 +647,8 @@ class TestTemplateUsage(cloudstackTestCase):
         list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT'
+                                   type='ROOT',
+                                   listall=True
                                    )
         if isinstance(list_volume, list):        
             cls.volume = list_volume[0]
@@ -631,11 +706,12 @@ class TestTemplateUsage(cloudstackTestCase):
         self.template.delete(self.apiclient)
         self.debug("Deleted template with ID: %s" % self.template.id)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
         self.assertEqual(
@@ -643,7 +719,28 @@ class TestTemplateUsage(cloudstackTestCase):
                          True,
                          "Check DB query result set for valid data"
                          )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
 
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
         self.assertNotEqual(
                             len(qresultset),
                             0,
@@ -675,6 +772,7 @@ class TestISOUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["server"]["zoneid"] = cls.zone.id
         cls.services["iso"]["zoneid"] = cls.zone.id
@@ -682,6 +780,7 @@ class TestISOUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls.iso = Iso.create(
@@ -741,14 +840,37 @@ class TestISOUsage(cloudstackTestCase):
         # Delete the ISO
         self.debug("Deleting ISO with ID: %s" % self.iso.id)
         self.iso.delete(self.apiclient)
-
-        self.debug("select type from usage_event where account_id = %s;" \
+        
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+        
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
@@ -763,13 +885,13 @@ class TestISOUsage(cloudstackTestCase):
 
         qresult = str(qresultset)
         self.debug("Query result: %s" % qresult)
+
         # Check for ISO.CREATE, ISO.DELETE events in cloud.usage_event table
-        # XXX: ISO.CREATE event is not logged in usage_event table. 
-#        self.assertEqual(
-#                            qresult.count('ISO.CREATE'),
-#                            1,
-#                            "Check ISO.CREATE event in events table"
-#                        )
+        self.assertEqual(
+                            qresult.count('ISO.CREATE'),
+                            1,
+                            "Check ISO.CREATE event in events table"
+                        )
 
         self.assertEqual(
                             qresult.count('ISO.DELETE'),
@@ -786,6 +908,7 @@ class TestLBRuleUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -800,6 +923,7 @@ class TestLBRuleUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -878,13 +1002,36 @@ class TestLBRuleUsage(cloudstackTestCase):
         self.debug("Deleting LB rule with ID: %s" % lb_rule.id)
         lb_rule.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
@@ -922,6 +1069,7 @@ class TestSnapshotUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -937,6 +1085,7 @@ class TestSnapshotUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -998,7 +1147,8 @@ class TestSnapshotUsage(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=self.virtual_machine.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                          isinstance(volumes, list),
@@ -1016,12 +1166,34 @@ class TestSnapshotUsage(cloudstackTestCase):
         self.debug("Deleting snapshot: %s" % snapshot.id)
         snapshot.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
-
+        
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
+                        )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
                         )
         
         self.assertEqual(
@@ -1062,6 +1234,7 @@ class TestNatRuleUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -1076,6 +1249,7 @@ class TestNatRuleUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1155,13 +1329,36 @@ class TestNatRuleUsage(cloudstackTestCase):
         self.debug("Deleting NAT rule: %s" % nat_rule.id)
         nat_rule.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
         
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,
@@ -1190,7 +1387,7 @@ class TestNatRuleUsage(cloudstackTestCase):
                         )
         return
 
-@unittest.skip("Feature in 3.0 release")
+
 class TestVpnUsage(cloudstackTestCase):
 
     @classmethod
@@ -1198,6 +1395,7 @@ class TestVpnUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -1212,7 +1410,8 @@ class TestVpnUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
-                            admin=True
+                            admin=True,
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1297,6 +1496,7 @@ class TestVpnUsage(cloudstackTestCase):
                                  account=self.account.account.name,
                                  domainid=self.account.account.domainid
                                  )
+
         # Remove VPN user
         self.debug("Deleting VPN user: %s" % vpnuser.id)
         vpnuser.delete(self.apiclient)
@@ -1305,13 +1505,36 @@ class TestVpnUsage(cloudstackTestCase):
         self.debug("Deleting VPN: %s" % vpn.publicipid)
         vpn.delete(self.apiclient)
 
-        self.debug("select type from usage_event where account_id = %s;" \
+        # Fetch account ID from account_uuid 
+        self.debug("select id from account where uuid = '%s';" \
                         % self.account.account.id)
-
+        
         qresultset = self.dbclient.execute(
-                        "select type from usage_event where account_id = %s;" \
+                        "select id from account where uuid = '%s';" \
                         % self.account.account.id
                         )
+        self.assertEqual(
+                         isinstance(qresultset, list),
+                         True,
+                         "Check DB query result set for valid data"
+                         )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+
+        account_id = qresult[0]
+        self.debug("select type from usage_event where account_id = '%s';" \
+                        % account_id)
+        
+        qresultset = self.dbclient.execute(
+                        "select type from usage_event where account_id = '%s';" \
+                        % account_id
+                        )
+
         self.assertEqual(
                          isinstance(qresultset, list),
                          True,

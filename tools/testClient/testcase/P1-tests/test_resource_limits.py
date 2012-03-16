@@ -58,10 +58,10 @@ class Services:
                         "template": {
                                     "displaytext": "Cent OS Template",
                                     "name": "Cent OS Template",
-                                    "ostypeid": 12,
+                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                     "templatefilter": 'self',
                         },
-                        "ostypeid": 12,
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         # Cent OS 5.3 (64 bit)
                         "sleep": 60,
                         "timeout": 10,
@@ -75,6 +75,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         cls.template = get_template(
@@ -88,11 +89,13 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         cls.account_1 = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
         # Create Account, VMs etc
         cls.account_2 = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.service_offering = ServiceOffering.create(
@@ -436,7 +439,8 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -475,7 +479,8 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_2.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -729,7 +734,8 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -771,7 +777,8 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_2.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -1068,7 +1075,8 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -1200,7 +1208,8 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
         self.assertEqual(
                         isinstance(volumes, list),

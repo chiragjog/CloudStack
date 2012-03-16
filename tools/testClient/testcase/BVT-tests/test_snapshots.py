@@ -79,17 +79,16 @@ class Services:
                                 {
                                     "displaytext": 'Template from snapshot',
                                     "name": 'Template from snapshot',
-                                    "ostypeid": 12,
+                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                     "templatefilter": 'self',
                                 },
-                            "ostypeid": 12,
+                            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                             # Cent OS 5.3 (64 bit)
                             "diskdevice": "/dev/xvdb",      # Data Disk
                             "rootdisk": "/dev/xvda",        # Root Disk
 
                             "diskname": "Test Disk",
                             "size": 1,          # GBs
-                            "domainid": 1,
 
                             "mount_dir": "/mnt/tmp",
                             "sub_dir": "test",
@@ -130,7 +129,8 @@ class TestSnapshotRootDisk(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -192,7 +192,8 @@ class TestSnapshotRootDisk(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=self.virtual_machine_with_disk.id,
-                            type='ROOT'
+                            type='ROOT',
+                            listall=True
                             )
 
         snapshot = Snapshot.create(
@@ -224,12 +225,12 @@ class TestSnapshotRootDisk(cloudstackTestCase):
                             "Check resource id in list resources call"
                         )
         self.debug(
-            "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
-            % snapshot.id
+            "select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
+            % str(snapshot.id)
             )
         qresultset = self.dbclient.execute(
-                        "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
-                        % snapshot.id
+                        "select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
+                        % str(snapshot.id)
                         )
         self.assertNotEqual(
                             len(qresultset),
@@ -351,7 +352,8 @@ class TestSnapshots(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -417,7 +419,8 @@ class TestSnapshots(cloudstackTestCase):
         volume = list_volumes(
                             self.apiclient,
                             virtualmachineid=self.virtual_machine_with_disk.id,
-                            type='DATADISK'
+                            type='DATADISK',
+                            listall=True
                             )
         self.assertEqual(
                             isinstance(volume, list),
@@ -452,12 +455,12 @@ class TestSnapshots(cloudstackTestCase):
                             "Check resource id in list resources call"
                         )
         self.debug(
-            "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
-            % snapshot.id
+            "select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
+            % str(snapshot.id)
             )
         qresultset = self.dbclient.execute(
-                        "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
-                        % snapshot.id
+                        "select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
+                        % str(snapshot.id)
                         )
         self.assertNotEqual(
                             len(qresultset),
@@ -614,7 +617,8 @@ class TestSnapshots(cloudstackTestCase):
         list_volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK'
+                                    type='DATADISK',
+                                    listall=True
                                     )
 
         volume_response = list_volume_response[0]
@@ -733,7 +737,8 @@ class TestSnapshots(cloudstackTestCase):
         volumes = list_volumes(
                                self.apiclient,
                                virtualmachineid=self.virtual_machine.id,
-                               type='DATADISK'
+                               type='DATADISK',
+                               listall=True
                                )
         self.assertEqual(
                             isinstance(volumes, list),
@@ -770,7 +775,8 @@ class TestSnapshots(cloudstackTestCase):
         volume = list_volumes(
                         self.apiclient,
                         virtualmachineid=self.virtual_machine_with_disk.id,
-                        type='ROOT'
+                        type='ROOT',
+                        listall=True
                         )
         self.assertEqual(
                             isinstance(volume, list),
@@ -859,7 +865,8 @@ class TestSnapshots(cloudstackTestCase):
         volume = list_volumes(
                         self.apiclient,
                         virtualmachineid=self.virtual_machine_with_disk.id,
-                        type='DATADISK'
+                        type='DATADISK',
+                        listall=True
                         )
 
         self.assertEqual(
@@ -1004,7 +1011,8 @@ class TestSnapshots(cloudstackTestCase):
         volumes = list_volumes(
                         self.apiclient,
                         virtualmachineid=self.virtual_machine.id,
-                        type='ROOT'
+                        type='ROOT',
+                        listall=True
                         )
         self.assertEqual(
                             isinstance(volumes, list),

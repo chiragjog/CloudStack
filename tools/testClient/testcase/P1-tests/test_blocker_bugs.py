@@ -62,7 +62,7 @@ class Services:
                         "templates": {
                                     "displaytext": 'Template from snapshot',
                                     "name": 'Template from snapshot',
-                                    "ostypeid": 12,
+                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                     "templatefilter": 'self',
                                     "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                     "hypervisor": 'XenServer',
@@ -84,7 +84,7 @@ class Services:
                                     "endport": 22,
                                     "protocol": "TCP"
                         },
-                        "ostypeid": 12,
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         # Cent OS 5.3 (64 bit)                        
                         "sleep":60,
                         "mode": 'advanced',
@@ -99,6 +99,7 @@ class TestSnapshots(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -118,7 +119,8 @@ class TestSnapshots(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -252,7 +254,8 @@ class TestSnapshots(cloudstackTestCase):
         list_volume_response = Volume.list(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK'
+                                    type='DATADISK',
+                                    listall=True
                                     )
 
         self.assertEqual(
@@ -376,7 +379,7 @@ class TestSnapshots(cloudstackTestCase):
             ssh_client.execute(c)
         return
 
-@unittest.skip("Open Questions")
+
 class TestTemplate(cloudstackTestCase):
 
     def setUp(self):
@@ -402,6 +405,7 @@ class TestTemplate(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.services["templates"]["zoneid"] = cls.zone.id
@@ -412,7 +416,8 @@ class TestTemplate(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -448,6 +453,7 @@ class TestTemplate(cloudstackTestCase):
         template = Template.register(
                                     self.apiclient,
                                     self.services["templates"],
+                                    zoneid=self.zone.id,
                                     account=self.account.account.name,
                                     domainid=self.account.account.domainid
                                     )
@@ -518,6 +524,7 @@ class TestNATRules(cloudstackTestCase):
         cls.services = Services().services
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -528,7 +535,8 @@ class TestNATRules(cloudstackTestCase):
         cls.account = Account.create(
                                 cls.api_client,
                                 cls.services["account"],
-                                admin=True
+                                admin=True,
+                                domainid=cls.domain.id
                                 )
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.service_offering = ServiceOffering.create(
@@ -623,12 +631,34 @@ class TestNATRules(cloudstackTestCase):
                         )
         # Verify the entries made in firewall_rules tables
         self.debug(
-                   "select id, state from firewall_rules where ip_address_id = %s;" \
+                   "select id from user_ip_address where uuid = '%s';" \
                     % public_ip.id
                   )
         qresultset = self.dbclient.execute(
-                        "select id, state from firewall_rules where ip_address_id = %s;" \
+                        "select id from user_ip_address where uuid = '%s';" \
                         % public_ip.id
+                        )
+        self.assertEqual(
+                            isinstance(qresultset, list),
+                            True,
+                            "Check database query returns a valid data"
+                        )
+        
+        self.assertNotEqual(
+                            len(qresultset),
+                            0,
+                            "Check DB Query result set"
+                            )
+        qresult = qresultset[0]
+        public_ip_id = qresult[0]
+        # Verify the entries made in firewall_rules tables
+        self.debug(
+                   "select id, state from firewall_rules where ip_address_id = '%s';" \
+                    % public_ip_id
+                  )
+        qresultset = self.dbclient.execute(
+                        "select id, state from firewall_rules where ip_address_id = '%s';" \
+                        % public_ip_id
                         )
         self.assertEqual(
                             isinstance(qresultset, list),
@@ -664,11 +694,11 @@ class TestNATRules(cloudstackTestCase):
         
         # Verify the entries made in firewall_rules tables
         self.debug(
-                   "select id, state from firewall_rules where ip_address_id = %s;" \
+                   "select id, state from firewall_rules where ip_address_id = '%s';" \
                     % public_ip.id
                   )
         qresultset = self.dbclient.execute(
-                        "select id, state from firewall_rules where ip_address_id = %s;" \
+                        "select id, state from firewall_rules where ip_address_id = '%s';" \
                         % public_ip.id
                         )
         
@@ -810,6 +840,7 @@ class TestRouterRestart(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -821,7 +852,8 @@ class TestRouterRestart(cloudstackTestCase):
         #Create an account, network, VM and IP addresses
         cls.account = Account.create(
                                      cls.api_client,
-                                     cls.services["account"]
+                                     cls.services["account"],
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -936,6 +968,7 @@ class TestTemplates(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, templates etc
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -946,7 +979,8 @@ class TestTemplates(cloudstackTestCase):
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -972,7 +1006,8 @@ class TestTemplates(cloudstackTestCase):
         list_volume = Volume.list(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT'
+                                   type='ROOT',
+                                   listall=True
                                    )
         try:
             if isinstance(list_volume, list):

@@ -76,7 +76,7 @@ class Services:
                     "endport": -1,
                     "cidrlist": '0.0.0.0/0',                                     
                 },
-            "ostypeid": 12,
+            "ostypeid": '0c2c5d19-525b-41be-a8c3-c6607412f82b',
             # CentOS 5.3 (64-bit)
             "sleep": 60,
             "timeout": 10,
@@ -129,7 +129,8 @@ class TestDefaultSecurityGroup(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
-                            admin=True
+                            admin=True,
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -211,7 +212,8 @@ class TestDefaultSecurityGroup(cloudstackTestCase):
                    )
         routers = list_routers(
                                self.apiclient,
-                               zoneid=self.zone.id
+                               zoneid=self.zone.id,
+                               listall=True
                                )
         self.assertEqual(
                          isinstance(routers, list),
@@ -393,7 +395,8 @@ class TestAuthorizeIngressRule(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -526,7 +529,8 @@ class TestRevokeIngressRule(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -683,7 +687,8 @@ class TestDhcpOnlyRouter(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls.virtual_machine = VirtualMachine.create(
@@ -721,7 +726,8 @@ class TestDhcpOnlyRouter(cloudstackTestCase):
         # Find router associated with user account
         list_router_response = list_routers(
                                     self.apiclient,
-                                    zoneid=self.zone.id
+                                    zoneid=self.zone.id,
+                                    listall=True
                                     )
         self.assertEqual(
                             isinstance(list_router_response, list),
@@ -814,7 +820,8 @@ class TestdeployVMWithUserData(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -849,7 +856,8 @@ class TestdeployVMWithUserData(cloudstackTestCase):
         # Find router associated with user account
         list_router_response = list_routers(
                                     self.apiclient,
-                                    zoneid=self.zone.id
+                                    zoneid=self.zone.id,
+                                    listall=True
                                     )
         self.assertEqual(
                             isinstance(list_router_response, list),
@@ -969,7 +977,8 @@ class TestDeleteSecurityGroup(cloudstackTestCase):
                                             )
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=self.domain.id
                             )
         self.services["account"] = self.account.account.name
         self.cleanup = [
@@ -1210,7 +1219,8 @@ class TestIngressRule(cloudstackTestCase):
                                             )
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=self.domain.id
                             )
         self.services["account"] = self.account.account.name
         self.cleanup = [
@@ -1485,12 +1495,11 @@ class TestIngressRule(cloudstackTestCase):
                     self.account.account.name
                 ))
         
-       # Revoke Security group to SSH to VM
-       result = security_group.revoke(
+        result = security_group.revoke(
                                 self.apiclient, 
                                 id = icmp_rule["ruleid"]
                                 )
-       self.debug("Revoke ingress rule result: %s" % result)
+        self.debug("Revoke ingress rule result: %s" % result)
 
         time.sleep(self.services["sleep"])
         # User should not be able to ping VM

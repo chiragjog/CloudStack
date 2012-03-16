@@ -59,12 +59,12 @@ class Services:
                          "template_1": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": 12,
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                          },
                          "template_2": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": 12,
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "isfeatured": True,
                                 "ispublic": True,
                                 "isextractable": True,
@@ -78,10 +78,7 @@ class Services:
                         "isextractable": False,
                         "bootable": True,
                         "passwordenabled": True,
-                        "ostypeid": 12,
-                        "zoneid": 2,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         "mode": 'advanced',
                         # Networking mode: Advanced, basic
                         "sleep": 30,
@@ -132,7 +129,8 @@ class TestCreateTemplate(cloudstackTestCase):
 
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -181,7 +179,8 @@ class TestCreateTemplate(cloudstackTestCase):
         list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT'
+                                   type='ROOT',
+                                   listall=True
                                    )
 
         cls.volume = list_volume[0]
@@ -293,12 +292,15 @@ class TestTemplates(cloudstackTestCase):
 
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            admin=True,
+                            domainid=cls.domain.id
                             )
 
         cls.user = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -347,7 +349,8 @@ class TestTemplates(cloudstackTestCase):
         list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT'
+                                   type='ROOT',
+                                   listall=True
                                    )
         try:
             cls.volume = list_volume[0]

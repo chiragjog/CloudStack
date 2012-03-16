@@ -62,7 +62,7 @@ class Services:
                             0:{
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": 126,
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                 "hypervisor": 'XenServer',
                                 "format" : 'VHD',
@@ -74,12 +74,12 @@ class Services:
                         "template": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": 12,
+                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                                 "templatefilter": 'self',
                         },
                         "templatefilter": 'self',
                         "destzoneid": 2, # For Copy template (Destination zone)
-                        "ostypeid": 12,
+                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
                         "sleep": 60,
                         "timeout": 10,
                         "mode": 'advanced', # Networking mode: Advanced, basic
@@ -112,6 +112,7 @@ class TestCreateTemplate(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
 
@@ -121,7 +122,8 @@ class TestCreateTemplate(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -166,6 +168,7 @@ class TestCreateTemplate(cloudstackTestCase):
             template = Template.register(
                                         self.apiclient,
                                         v,
+                                        zoneid=self.zone.id,
                                         account=self.account.account.name,
                                         domainid=self.account.account.domainid
                                         )
@@ -264,6 +267,7 @@ class TestTemplates(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, templates etc
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -274,7 +278,8 @@ class TestTemplates(cloudstackTestCase):
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -303,7 +308,8 @@ class TestTemplates(cloudstackTestCase):
             list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT'
+                                   type='ROOT',
+                                   listall=True
                                    )
             if isinstance(list_volume, list):
                 break
@@ -518,7 +524,8 @@ class TestTemplates(cloudstackTestCase):
         volumes = list_volumes(
                         self.apiclient,
                         virtualmachineid=self.virtual_machine.id,
-                        type='ROOT'
+                        type='ROOT',
+                        listall=True
                         )
         volume = volumes[0]
         
