@@ -60,7 +60,7 @@ class Services:
                         "publicport": 22,
                         "protocol": 'TCP',
                         "diskdevice": "/dev/xvdb",
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         "mode": 'advanced',
                         "sleep": 60,
                         "timeout": 10,
@@ -473,10 +473,10 @@ class TestVolumes(cloudstackTestCase):
             fd.write(response.read())
             fd.close()
 
-        except Exception:
+        except Exception as e:
             self.fail(
-                "Extract Volume Failed with invalid URL %s (vol id: %s)" \
-                % (extract_vol.url, self.volume.id)
+                "Extract Volume Failed with invalid URL %s (vol id: %s) Error: %s" \
+                % (extract_vol.url, self.volume.id, e)
             )
 
     def test_07_delete_detached_volume(self):

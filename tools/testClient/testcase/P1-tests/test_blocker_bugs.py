@@ -62,7 +62,7 @@ class Services:
                         "templates": {
                                     "displaytext": 'Template from snapshot',
                                     "name": 'Template from snapshot',
-                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                    "ostypeid": 12,
                                     "templatefilter": 'self',
                                     "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                     "hypervisor": 'XenServer',
@@ -84,7 +84,7 @@ class Services:
                                     "endport": 22,
                                     "protocol": "TCP"
                         },
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)                        
                         "sleep":60,
                         "mode": 'advanced',
@@ -254,8 +254,7 @@ class TestSnapshots(cloudstackTestCase):
         list_volume_response = Volume.list(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK',
-                                    listall=True
+                                    type='DATADISK'
                                     )
 
         self.assertEqual(
@@ -379,7 +378,7 @@ class TestSnapshots(cloudstackTestCase):
             ssh_client.execute(c)
         return
 
-
+@unittest.skip("Open Questions")
 class TestTemplate(cloudstackTestCase):
 
     def setUp(self):
@@ -631,34 +630,12 @@ class TestNATRules(cloudstackTestCase):
                         )
         # Verify the entries made in firewall_rules tables
         self.debug(
-                   "select id from user_ip_address where uuid = '%s';" \
+                   "select id, state from firewall_rules where ip_address_id = %s;" \
                     % public_ip.id
                   )
         qresultset = self.dbclient.execute(
-                        "select id from user_ip_address where uuid = '%s';" \
+                        "select id, state from firewall_rules where ip_address_id = %s;" \
                         % public_ip.id
-                        )
-        self.assertEqual(
-                            isinstance(qresultset, list),
-                            True,
-                            "Check database query returns a valid data"
-                        )
-        
-        self.assertNotEqual(
-                            len(qresultset),
-                            0,
-                            "Check DB Query result set"
-                            )
-        qresult = qresultset[0]
-        public_ip_id = qresult[0]
-        # Verify the entries made in firewall_rules tables
-        self.debug(
-                   "select id, state from firewall_rules where ip_address_id = '%s';" \
-                    % public_ip_id
-                  )
-        qresultset = self.dbclient.execute(
-                        "select id, state from firewall_rules where ip_address_id = '%s';" \
-                        % public_ip_id
                         )
         self.assertEqual(
                             isinstance(qresultset, list),
@@ -694,11 +671,11 @@ class TestNATRules(cloudstackTestCase):
         
         # Verify the entries made in firewall_rules tables
         self.debug(
-                   "select id, state from firewall_rules where ip_address_id = '%s';" \
+                   "select id, state from firewall_rules where ip_address_id = %s;" \
                     % public_ip.id
                   )
         qresultset = self.dbclient.execute(
-                        "select id, state from firewall_rules where ip_address_id = '%s';" \
+                        "select id, state from firewall_rules where ip_address_id = %s;" \
                         % public_ip.id
                         )
         
@@ -1006,8 +983,7 @@ class TestTemplates(cloudstackTestCase):
         list_volume = Volume.list(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT',
-                                   listall=True
+                                   type='ROOT'
                                    )
         try:
             if isinstance(list_volume, list):

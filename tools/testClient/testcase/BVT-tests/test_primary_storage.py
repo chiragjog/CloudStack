@@ -22,7 +22,7 @@ class Services:
         self.services = {
                         "nfs": {
                             0: {
-                                "url": "nfs://192.168.100.131/testprimary",
+                                "url": "nfs://192.168.100.131/Primary",
                                 # Format: File_System_Type/Location/Path
                                 "name": "Primary XEN",
                                 "hypervisor": 'XEN',
@@ -46,7 +46,7 @@ class Services:
                                 "hypervisor": 'XEN',
                             },
                         },
-                        "zoneid": '5894a264-12b0-4257-a316-06c831bcf8e2',
+                        "zoneid": 2,
                         # Optional, if specified the mentioned zone will be
                         # used for tests
                  }

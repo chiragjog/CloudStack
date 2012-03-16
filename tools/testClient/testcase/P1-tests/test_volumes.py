@@ -65,10 +65,10 @@ class Services:
                           "name": "testISO",
                           "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                           # Source URL where ISO is located
-                          "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                          "ostypeid": 76,
                           },
                         "sleep": 50,
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         "mode": 'advanced',
                     }
 
@@ -175,8 +175,7 @@ class TestAttachVolume(cloudstackTestCase):
         list_volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK',
-                                    listall=True
+                                    type='DATADISK'
                                     )
         self.assertEqual(
                                 isinstance(list_volume_response, list),
@@ -350,7 +349,6 @@ class TestAttachDetachVolume(cloudstackTestCase):
         cls.services = Services().services
 
         # Get Zone, Domain and templates
-        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -469,8 +467,7 @@ class TestAttachDetachVolume(cloudstackTestCase):
         list_volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK',
-                                    listall=True
+                                    type='DATADISK'
                                     )
         self.assertEqual(
                                 isinstance(list_volume_response, list),
@@ -704,8 +701,7 @@ class TestAttachVolumeISO(cloudstackTestCase):
         list_volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK',
-                                    listall=True
+                                    type='DATADISK'
                                     )
         self.assertEqual(
                                 isinstance(list_volume_response, list),
@@ -908,8 +904,7 @@ class TestVolumes(cloudstackTestCase):
         list_volume_response = list_volumes(
                                     self.apiclient,
                                     virtualmachineid=self.virtual_machine.id,
-                                    type='DATADISK',
-                                    listall=True
+                                    type='DATADISK'
                                     )
         self.assertEqual(
                          isinstance(list_volume_response, list),

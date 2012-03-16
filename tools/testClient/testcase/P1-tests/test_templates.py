@@ -62,7 +62,7 @@ class Services:
                             0:{
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                "ostypeid": 126,
                                 "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                 "hypervisor": 'XenServer',
                                 "format" : 'VHD',
@@ -74,12 +74,12 @@ class Services:
                         "template": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                "ostypeid": 12,
                                 "templatefilter": 'self',
                         },
                         "templatefilter": 'self',
                         "destzoneid": 2, # For Copy template (Destination zone)
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         "sleep": 60,
                         "timeout": 10,
                         "mode": 'advanced', # Networking mode: Advanced, basic
@@ -308,8 +308,7 @@ class TestTemplates(cloudstackTestCase):
             list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT',
-                                   listall=True
+                                   type='ROOT'
                                    )
             if isinstance(list_volume, list):
                 break
@@ -524,8 +523,7 @@ class TestTemplates(cloudstackTestCase):
         volumes = list_volumes(
                         self.apiclient,
                         virtualmachineid=self.virtual_machine.id,
-                        type='ROOT',
-                        listall=True
+                        type='ROOT'
                         )
         volume = volumes[0]
         

@@ -58,10 +58,10 @@ class Services:
                         "template": {
                                     "displaytext": "Cent OS Template",
                                     "name": "Cent OS Template",
-                                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                    "ostypeid": 12,
                                     "templatefilter": 'self',
                         },
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)
                         "sleep": 60,
                         "timeout": 10,
@@ -439,8 +439,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -479,8 +478,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_2.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -734,8 +732,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -777,8 +774,7 @@ class TestResourceLimitsAccount(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_2.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -1075,8 +1071,7 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),
@@ -1208,8 +1203,7 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         volumes = list_volumes(
                             self.apiclient,
                             virtualmachineid=virtual_machine_1.id,
-                            type='ROOT',
-                            listall=True
+                            type='ROOT'
                             )
         self.assertEqual(
                         isinstance(volumes, list),

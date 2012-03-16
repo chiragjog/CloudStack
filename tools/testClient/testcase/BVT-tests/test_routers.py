@@ -47,7 +47,7 @@ class Services:
                                         "username": "testuser",
                                         "password": "fr3sca",
                                         },
-                         "ostypeid":'144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                         "ostypeid":12,
                          "sleep": 60,
                          "timeout": 10,
                          "mode": 'advanced', #Networking mode: Basic, Advanced

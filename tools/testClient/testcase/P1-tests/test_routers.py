@@ -74,7 +74,7 @@ class Services:
                                     "cidr": '55.55.0.0/11',
                                     # Any network (For creating FW rule
                                     },
-                         "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                         "ostypeid":12,
                          # Used for Get_Template : CentOS 5.3 (64 bit)
                          "mode": 'advanced', # Networking mode: Advanced, basic
                         }
@@ -291,6 +291,11 @@ class TestRouterServices(cloudstackTestCase):
                         'Firewall' in str(network.service),
                         True,
                         "Check Firewall service in list networks"
+                    )
+            self.assertEqual(
+                        'Gateway' in str(network.service),
+                        True,
+                        "Check Gateway service in list networks"
                     )
             self.assertEqual(
                         'Dns' in str(network.service),
@@ -551,6 +556,233 @@ class TestRouterServices(cloudstackTestCase):
                                                     ))
         return
 
+
+class TestRouterStopAssociateIp(cloudstackTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls.api_client = fetch_api_client()
+        cls.services = Services().services
+        # Get Zone, Domain and templates
+        cls.zone = get_zone(cls.api_client, cls.services)
+        template = get_template(
+                            cls.api_client,
+                            cls.zone.id,
+                            cls.services["ostypeid"]
+                            )
+        cls.services["virtual_machine"]["zoneid"] = cls.zone.id
+
+        #Create an account, network, VM and IP addresses
+        cls.account = Account.create(
+                                     cls.api_client,
+                                     cls.services["account"]
+                                     )
+        cls.service_offering = ServiceOffering.create(
+                                            cls.api_client,
+                                            cls.services["service_offering"]
+                                            )
+        cls.vm_1 = VirtualMachine.create(
+                                    cls.api_client,
+                                    cls.services["virtual_machine"],
+                                    templateid=template.id,
+                                    accountid=cls.account.account.name,
+                                    domainid=cls.account.account.domainid,
+                                    serviceofferingid=cls.service_offering.id
+                                    )
+        cls.cleanup = [
+                       cls.account,
+                       cls.service_offering
+                       ]
+        return
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.api_client = fetch_api_client()
+            # Clean up resources
+            cleanup_resources(cls.api_client, cls.cleanup)
+
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
+
+    def tearDown(self):
+        try:
+            # Clean up resources
+            cleanup_resources(self.apiclient, self._cleanup)
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
+
+    def setUp(self):
+        self.apiclient = self.testClient.getApiClient()
+        self._cleanup = []
+        return
+
+    def test_01_RouterStopAssociateIp(self):
+        """Test router stop associate IP
+        """
+
+        # validate the following
+        # 1. wait for router to start, guest network to be implemented and
+        #    VM to report Running
+        # 2. stopRouter for this account
+        # 3. wait for listRouters to report Router as 'Stopped'
+        # 4. associateIpAddress account=user, zoneid=<z>, domainid=1,
+        #    networkid=<from listNetworks>
+        # 5. startRouter stopped in step 3.
+        # 6. wait for listRouters to show router as Running
+        # 7. listPublicIpAddress with id as given when associateIpAddress was
+        #    called state of IP should be 'Allocated'
+        # 8. listRouter account=user, get the link-local-ip and the hostid
+        # 9. listHosts with hostid from step 3.
+        # 10. double-hop into Router (ssh) through the host it is resident on
+        # 11. "ip addr show" should give you the associateIpAddress on eth2
+
+        # Get router details associated with account
+        routers = list_routers(
+                               self.apiclient,
+                               account=self.account.account.name,
+                               domainid=self.account.account.domainid,
+                               )
+
+        self.assertEqual(
+                        isinstance(routers, list),
+                        True,
+                        "Check for list routers response return valid data"
+                        )
+        
+        self.assertNotEqual(
+                             len(routers),
+                             0,
+                             "Check list router response"
+                             )
+
+        router = routers[0]
+
+        self.debug("Stopping router ID: %s" % router.id)
+        #Stop the router
+        cmd = stopRouter.stopRouterCmd()
+        cmd.id = router.id
+        self.apiclient.stopRouter(cmd)
+
+        routers = list_routers(
+                               self.apiclient,
+                               account=self.account.account.name,
+                               domainid=self.account.account.domainid,
+                               )
+        self.assertEqual(
+                        isinstance(routers, list),
+                        True,
+                        "Check for list routers response return valid data"
+                        )
+        
+        router = routers[0]
+
+        self.assertEqual(
+                    router.state,
+                    'Stopped',
+                    "Check list router response for router state"
+                    )
+
+        networks = list_networks(
+                                 self.apiclient,
+                                 account=self.account.account.name,
+                                 domainid=self.account.account.domainid,
+                                 )
+        self.assertEqual(
+                        isinstance(networks, list),
+                        True,
+                        "Check for list networks response return valid data"
+                        )
+        
+        self.assertNotEqual(
+                             len(networks),
+                             0,
+                             "Check list networks response"
+                             )
+        network = networks[0]
+        self.debug("Associating public IP for account: %s" % 
+                                            self.account.account.name)
+        # Associate IP address with account
+        public_ip = PublicIPAddress.create(
+                                self.apiclient,
+                                accountid=self.account.account.name,
+                                zoneid=self.zone.id,
+                                domainid=self.account.account.domainid,
+                                networkid=network.id
+                                )
+        self.debug("Starting router ID: %s" % router.id)
+        #Start the router
+        cmd = startRouter.startRouterCmd()
+        cmd.id = router.id
+        self.apiclient.startRouter(cmd)
+
+        routers = list_routers(
+                               self.apiclient,
+                               account=self.account.account.name,
+                               domainid=self.account.account.domainid,
+                               )
+        self.assertEqual(
+                        isinstance(networks, list),
+                        True,
+                        "Check for list networks response return valid data"
+                        )
+        
+        router = routers[0]
+        # Check if router is in Running state
+        self.assertEqual(
+                    router.state,
+                    'Running',
+                    "Check list router response for router state"
+                    )
+        # Check if Public IP is in Allocated state
+        public_ips = list_publicIP(
+                                   self.apiclient,
+                                   id=public_ip.ipaddress.id
+                                   )
+        self.assertEqual(
+                        isinstance(public_ips, list),
+                        True,
+                        "Check for list public IPs response return valid data"
+                        )
+        
+        self.assertEqual(
+                    public_ips[0].state,
+                    'Allocated',
+                    "Check list public IP response"
+                    )
+
+        hosts = list_hosts(
+                           self.apiclient,
+                           id=router.hostid,
+                           )
+        self.assertEqual(
+                        isinstance(hosts, list),
+                        True,
+                        "Check for list hosts response return valid data"
+                        )
+        host = hosts[0]
+        # For DNS and DHCP check 'dnsmasq' process status
+        result = get_process_status(
+                                host.ipaddress,
+                                self.services['virtual_machine']["publicport"],
+                                self.vm_1.username,
+                                self.vm_1.password,
+                                router.linklocalip,
+                                'ip addr show'
+                                )
+        self.debug("ip addr show: %s" % str(result))
+        self.debug("Public IP address: %s" % public_ip.ipaddress.ipaddress)
+        
+        res = str(result)
+        self.assertEqual(
+                            result.count(str(public_ip.ipaddress.ipaddress)),
+                            1,
+                            "Check public IP address"
+                        )
+        return
 
 
 class TestRouterStopCreatePF(cloudstackTestCase):

@@ -40,7 +40,7 @@ class Services:
                         "isextractable": True,
                         "isfeatured": True,
                         "ispublic": True,
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                     },
             "iso_2":
                     {
@@ -51,7 +51,7 @@ class Services:
                         "isextractable": True,
                         "isfeatured": True,
                         "ispublic": True,
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         "mode": 'HTTP_DOWNLOAD',
                         # Used in Extract template, value must be HTTP_DOWNLOAD
                     },
@@ -64,7 +64,7 @@ class Services:
             "passwordenabled": True,
             "sleep": 60,
             "timeout": 10,
-            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+            "ostypeid": 12,
             # CentOS 5.3 (64 bit)
             "mode": 'advanced'
             # Networking mode: Basic or Advanced

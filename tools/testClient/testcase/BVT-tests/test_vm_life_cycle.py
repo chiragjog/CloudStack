@@ -95,7 +95,7 @@ class Services:
                     "name": "testISO",
                     "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                      # Source URL where ISO is located
-                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                    "ostypeid": 12,
                     "mode": 'HTTP_DOWNLOAD', # Downloading existing ISO 
                 },
             "diskdevice": '/dev/xvdd',
@@ -105,7 +105,7 @@ class Services:
             "timeout": 10,
             "hostid": 5,
             #Migrate VM to hostid
-            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+            "ostypeid": 12,
             # CentOS 5.3 (64-bit)
             "mode":'advanced',
             # Networking mode: Basic or Advanced

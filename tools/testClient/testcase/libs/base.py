@@ -1394,46 +1394,6 @@ class SecondaryStorage:
         apiclient.deleteHost(cmd)
         
 
-class PhysicalNetwork:
-    """Manage physical network storage"""
-
-    def __init__(self, items):
-        self.__dict__.update(items)
-
-    @classmethod
-    def create(cls, apiclient, services, zoneid, domainid=None):
-        """Create physical network"""
-        cmd = createPhysicalNetwork.createPhysicalNetworkCmd()
-
-        cmd.name = services["name"]
-        cmd.zoneid = zoneid
-        if domainid:
-            cmd.domainid = domainid
-        return PhysicalNetwork(apiclient.createPhysicalNetwork(cmd).__dict__)
-
-    def delete(self, apiclient):
-        """Delete Physical Network"""
-
-        cmd = deletePhysicalNetwork.deletePhysicalNetworkCmd()
-        cmd.id = self.id
-        apiclient.deletePhysicalNetwork(cmd)
-
-    def update(self, apiclient, **kwargs):
-        """Update Physical network state"""
-        
-        cmd = updatePhysicalNetwork.updatePhysicalNetworkCmd()
-        cmd.id = self.id
-        [setattr(cmd, k, v) for k, v in kwargs.items()]
-        return apiclient.updatePhysicalNetwork(cmd)
-        
-    def addTrafficType(self, apiclient, type):
-        """Add Traffic type to Physical network"""
-        
-        cmd = addTrafficType.addTrafficTypeCmd()
-        cmd.physicalnetworkid = self.id
-        cmd.traffictype = type
-        return apiclient.addTrafficType(cmd)
-
 class SecurityGroup:
     """Manage Security Groups"""
 

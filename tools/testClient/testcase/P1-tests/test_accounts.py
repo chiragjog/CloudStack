@@ -26,7 +26,7 @@ class Services:
                         "zone": {
                                  "dns1": '121.242.190.180',
                                  "internaldns1": '192.168.100.1',
-                                 "name" : "Basic test",
+                                 "name" : "Test Zone",
                                  "networktype" : "Basic",
                                  "dns2": '121.242.190.211',
                                  },
@@ -37,13 +37,6 @@ class Services:
                                  "startip": '192.168.100.132',
                                  "endip": '192.168.100.140',
                                  },
-                         "physical_network": {
-                                  "name" : "Physical network 1",
-                                },
-                         "network": {
-                                     "name": 'guestNetworkForBasicZone',
-                                     "displaytext": 'guestNetworkForBasicZone',
-                                },
                          "public_ip": {
                                  "gateway": '192.168.100.1',
                                  "netmask": '255.255.255.0',
@@ -83,7 +76,7 @@ class Services:
 
                             },
                         "mgmt_server": {
-                                        "ipaddress": '192.168.100.21',
+                                        "ipaddress": '192.168.100.154',
                                         "port": 22,
                                         "username": 'root',
                                         "password": 'fr3sca',
@@ -136,7 +129,7 @@ class Services:
                          "template": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                "ostypeid": 126,
                                 "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
                                 "hypervisor": 'XenServer',
                                 "format" : 'VHD',
@@ -144,7 +137,7 @@ class Services:
                                 "ispublic": True,
                                 "isextractable": True,
                         },
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         # Cent OS 5.3 (64 bit)
                         "sleep": 60,
                         "timeout": 10,
@@ -1033,87 +1026,10 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         cls.services["public_ip"]["zoneid"] = cls.zone.id
         cls.services["public_ip"]["podid"] = cls.pod.id
 
-        cls.physical_network = PhysicalNetwork.create(
-                                                cls.api_client, 
-                                                cls.services["physical_network"],
-                                                cls.zone.id,
-                                                cls.domain.id
-                                                )
-        cls.physical_network.addTrafficType(
-                                            cls.api_client, 
-                                            type='Guest'
-                                            )
-        cls.physical_network.addTrafficType(
-                                            cls.api_client,
-                                            type='Management'
-                                            )
-        cls.physical_network.update(
-                                    cls.api_client,
-                                    state='Enabled'
-                                    )
-        nsp_list = list_nw_service_prividers(
-                                    cls.api_client,
-                                    name='VirtualRouter',
-                                    physicalNetworkId=cls.physical_network.id
-                                    )
-        if isinstance(nsp_list, list):
-            nsp = nsp_list[0]
-        else:
-            raise Exception("List Network Service Providers call failed")
-
-        virtual_routers = list_virtual_router_elements(
-                                                       cls.api_client,
-                                                       nspid=nsp.id
-                                                    )
-        if isinstance(virtual_routers, list):
-            virtual_router = virtual_routers[0]
-        else:
-            raise Exception("List virtual routers call failed")
-
-        cmd = configureVirtualRouterElement.configureVirtualRouterElementCmd()
-        cmd.id = virtual_router.id
-        cmd.enabled = True
-        cls.api_client.configureVirtualRouterElement(cmd)
-        
-        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
-        cmd.id = nsp.id
-        cmd.state = 'Enabled'
-        cls.api_client.updateNetworkServiceProvider(cmd)
-
-        nsp_list = list_nw_service_prividers(
-                                    cls.api_client,
-                                    name='SecurityGroupProvider',
-                                    physicalNetworkId=cls.physical_network.id
-                                    )
-        if isinstance(nsp_list, list):
-            nsp = nsp_list[0]
-        else:
-            raise Exception("List Network Service Providers call failed")
-
-        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
-        cmd.id = nsp.id
-        cmd.state = 'Enabled'
-        cls.api_client.updateNetworkServiceProvider(cmd)
-
-        network_offerings = list_network_offerings(
-                                                   cls.api_client,                                   
-                                                   )
-        if isinstance(network_offerings, list):
-            cls.services["network"]["networkoffering"] = network_offerings[0].id
-        else: 
-            raise Exception("Invalid Network offering ID")
-
-        cls.services["network"]["zoneid"] = cls.zone.id
-        cls.network = Network.create(
-                                     cls.api_client, 
-                                     cls.services["network"]
-                                     )
-
         cls.public_ip_range = PublicIpRange.create(
                                               cls.api_client,
                                               cls.services["public_ip"]
                                               )
- 
         cls.services["cluster"]["zoneid"] = cls.zone.id
         cls.services["cluster"]["podid"] = cls.pod.id
 
@@ -1153,13 +1069,6 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                         cls.api_client,
                                         cls.services["sec_storage"]
                                         )
-        
-        # Enable the zone
-        
-        cls.zone.update(
-                        cls.api_client,
-                        allocationstate='Enabled'
-                        )
         # After adding Host, Clusters wait for SSVMs to come up
         wait_for_ssvms(
                        cls.api_client,
@@ -1250,7 +1159,6 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                           cls.api_client,
                                           name='account.cleanup.interval'
                                           )
-
             # Sleep for account.cleanup.interval * 2 to wait for expunge of
             # resources associated with that account
             if isinstance(cleanup_wait, list):
@@ -1284,17 +1192,12 @@ class TestAddVmToSubDomain(cloudstackTestCase):
 
             # Cleanup Primary, secondary storage, hosts, zones etc.
             cls.secondary_storage.delete(cls.api_client)
-            
             cls.host.delete(cls.api_client)
+            
             cls.primary_storage.delete(cls.api_client)
-            
-            cls.network.delete(cls.api_client)
             cls.cluster.delete(cls.api_client)
-            
-            cls.physical_network.delete(cls.api_client)
             cls.pod.delete(cls.api_client)
             cls.zone.delete(cls.api_client)
-
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
@@ -1312,7 +1215,6 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
-
 
     def test_01_add_vm_to_subdomain(self):
         """ Test Sub domain allowed to launch VM  when a Domain level zone is

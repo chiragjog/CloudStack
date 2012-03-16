@@ -55,7 +55,7 @@ class Services:
                                           # Hypervisor type
                                           "clustertype": 'CloudManaged',
                                           # CloudManaged or ExternalManaged"
-                                          "url": 'http://192.168.100.211',
+                                          "url": 'http://192.168.100.210',
                                           "username": "root",
                                           "password": "fr3sca",
                                           },
@@ -78,7 +78,7 @@ class Services:
                                           "password": "fr3sca",
                                          },
                                  },
-                         "zoneid": '5894a264-12b0-4257-a316-06c831bcf8e2',
+                         "zoneid": 2,
                          # Optional, if specified the mentioned zone will be
                          # used for tests
                        }

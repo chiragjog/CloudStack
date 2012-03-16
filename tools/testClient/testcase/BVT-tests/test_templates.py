@@ -59,12 +59,12 @@ class Services:
                          "template_1": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                "ostypeid": 12,
                          },
                          "template_2": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                                "ostypeid": 12,
                                 "isfeatured": True,
                                 "ispublic": True,
                                 "isextractable": True,
@@ -78,7 +78,7 @@ class Services:
                         "isextractable": False,
                         "bootable": True,
                         "passwordenabled": True,
-                        "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                        "ostypeid": 12,
                         "mode": 'advanced',
                         # Networking mode: Advanced, basic
                         "sleep": 30,
@@ -179,8 +179,7 @@ class TestCreateTemplate(cloudstackTestCase):
         list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT',
-                                   listall=True
+                                   type='ROOT'
                                    )
 
         cls.volume = list_volume[0]
@@ -349,8 +348,7 @@ class TestTemplates(cloudstackTestCase):
         list_volume = list_volumes(
                                    cls.api_client,
                                    virtualmachineid=cls.virtual_machine.id,
-                                   type='ROOT',
-                                   listall=True
+                                   type='ROOT'
                                    )
         try:
             cls.volume = list_volume[0]

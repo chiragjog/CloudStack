@@ -22,7 +22,7 @@ class Services:
 
     def __init__(self):
         self.services = {
-                            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                            "ostypeid": 12,
                             # Cent OS 5.3 (64 bit)
                             "mode": 'advanced',
                             # Networking mode: Basic or advanced
@@ -33,7 +33,7 @@ class Services:
                             "network": {
                                   "name": "Test Network",
                                   "displaytext": "Test Network",
-                                  "networkoffering": '3d4e36f1-6b5f-40fc-bb63-fe9353419e91',
+                                  "networkoffering": 6,
                                 },
                             "service_offering": {
                                     "name": "Tiny Instance",

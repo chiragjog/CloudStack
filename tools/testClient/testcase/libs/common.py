@@ -142,7 +142,7 @@ def wait_for_ssvms(apiclient, zoneid, podid, interval=60):
             ssvm = list_ssvm_response[0]
             if ssvm.state != 'Running':
                 # Sleep to ensure SSVMs are Up and Running
-                time.sleep(interval)
+                time.sleep(30)
                 timeout = timeout - 1
             elif ssvm.state == 'Running':
                 break
@@ -431,24 +431,3 @@ def list_usage_records(apiclient, **kwargs):
     cmd = listUsageRecords.listUsageRecordsCmd()
     [setattr(cmd, k, v) for k, v in kwargs.items()]
     return(apiclient.listUsageRecords(cmd))
-
-def list_nw_service_prividers(apiclient, **kwargs):
-    """Lists Network service providers"""
-
-    cmd = listNetworkServiceProviders.listNetworkServiceProvidersCmd()
-    [setattr(cmd, k, v) for k, v in kwargs.items()]
-    return(apiclient.listNetworkServiceProviders(cmd))
-
-def list_virtual_router_elements(apiclient, **kwargs):
-    """Lists Virtual Router elements"""
-
-    cmd = listVirtualRouterElements.listVirtualRouterElementsCmd()
-    [setattr(cmd, k, v) for k, v in kwargs.items()]
-    return(apiclient.listVirtualRouterElements(cmd))
-
-def list_network_offerings(apiclient, **kwargs):
-    """Lists network offerings"""
-
-    cmd = listNetworkOfferings.listNetworkOfferingsCmd()
-    [setattr(cmd, k, v) for k, v in kwargs.items()]
-    return(apiclient.listNetworkOfferings(cmd))

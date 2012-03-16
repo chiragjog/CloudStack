@@ -21,7 +21,7 @@ class Services:
     def __init__(self):
         self.services = {
                          "storage": {
-                                "url": "nfs://192.168.100.131/SecStorage"
+                                "url": "nfs://192.168.100.131/SecondaryStorage"
                                 # Format: File_System_Type/Location/Path
                             },
                         "hypervisors": {
@@ -281,7 +281,6 @@ class TestSecStorageServices(cloudstackTestCase):
                                     hypervisor=v["hypervisor"],
                                     zoneid=self.zone.id,
                                     templatefilter=v["templatefilter"],
-                                    listall=True,
                                     account='system',
                                     domainid=self.domain.id
                                     )
@@ -304,7 +303,6 @@ class TestSecStorageServices(cloudstackTestCase):
                                     id=templateid,
                                     zoneid=self.zone.id,
                                     templatefilter=v["templatefilter"],
-                                    listall=True,
                                     account='system',
                                     domainid=self.domain.id
                                     )
@@ -340,7 +338,6 @@ class TestSecStorageServices(cloudstackTestCase):
                                     id=templateid,
                                     zoneid=self.zone.id,
                                     templatefilter=v["templatefilter"],
-                                    listall=True,
                                     account='system',
                                     domainid=self.domain.id
                                     )
