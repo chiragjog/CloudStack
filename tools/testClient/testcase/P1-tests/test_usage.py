@@ -101,6 +101,7 @@ class TestVmUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -116,6 +117,7 @@ class TestVmUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -282,6 +284,7 @@ class TestPublicIPUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -297,6 +300,7 @@ class TestPublicIPUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -380,7 +384,6 @@ class TestPublicIPUsage(cloudstackTestCase):
                          True,
                          "Check DB query result set for valid data"
                          )
-        
         self.assertNotEqual(
                             len(qresultset),
                             0,
@@ -432,6 +435,7 @@ class TestVolumeUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -450,6 +454,7 @@ class TestVolumeUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -603,6 +608,7 @@ class TestTemplateUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["server"]["zoneid"] = cls.zone.id
         template = get_template(
@@ -613,7 +619,8 @@ class TestTemplateUsage(cloudstackTestCase):
         cls.services["server"]["zoneid"] = cls.zone.id
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -765,6 +772,7 @@ class TestISOUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["server"]["zoneid"] = cls.zone.id
         cls.services["iso"]["zoneid"] = cls.zone.id
@@ -772,6 +780,7 @@ class TestISOUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls.iso = Iso.create(
@@ -899,6 +908,7 @@ class TestLBRuleUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -913,6 +923,7 @@ class TestLBRuleUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1058,6 +1069,7 @@ class TestSnapshotUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -1073,6 +1085,7 @@ class TestSnapshotUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1221,6 +1234,7 @@ class TestNatRuleUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -1235,6 +1249,7 @@ class TestNatRuleUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1380,6 +1395,7 @@ class TestVpnUsage(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -1394,7 +1410,8 @@ class TestVpnUsage(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
-                            admin=True
+                            admin=True,
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name

@@ -111,6 +111,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -396,6 +397,7 @@ class TestAccountSnapshotClean(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -693,7 +695,7 @@ class TestSnapshotDetachedDisk(cloudstackTestCase):
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
-        
+
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
                                     cls.services["disk_offering"]
@@ -712,6 +714,7 @@ class TestSnapshotDetachedDisk(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -979,7 +982,8 @@ class TestSnapshotLimit(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -1225,6 +1229,7 @@ class TestSnapshotEvents(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name

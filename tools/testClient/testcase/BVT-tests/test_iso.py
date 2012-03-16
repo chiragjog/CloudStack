@@ -85,7 +85,8 @@ class TestCreateIso(cloudstackTestCase):
         
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=self.domain.id
                             )
         
         self.cleanup = [self.account]
@@ -182,6 +183,7 @@ class TestISO(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls.iso_1 = Iso.create(

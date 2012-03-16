@@ -88,6 +88,7 @@ class TestRouterServices(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.template = get_template(
                             cls.api_client,
@@ -100,7 +101,8 @@ class TestRouterServices(cloudstackTestCase):
         cls.account = Account.create(
                                      cls.api_client,
                                      cls.services["account"],
-                                     admin=True
+                                     admin=True,
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -559,6 +561,7 @@ class TestRouterStopCreatePF(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -571,7 +574,8 @@ class TestRouterStopCreatePF(cloudstackTestCase):
         cls.account = Account.create(
                                      cls.api_client,
                                      cls.services["account"],
-                                     admin=True
+                                     admin=True,
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -757,7 +761,8 @@ class TestRouterStopCreateLB(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
-        cls.zone = get_zone(cls.api_client)
+        cls.domain = get_domain(cls.api_client, cls.services)
+        cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
                             cls.zone.id,
@@ -769,7 +774,8 @@ class TestRouterStopCreateLB(cloudstackTestCase):
         cls.account = Account.create(
                                      cls.api_client,
                                      cls.services["account"],
-                                     admin=True
+                                     admin=True,
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -956,6 +962,7 @@ class TestRouterStopCreateFW(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -967,7 +974,8 @@ class TestRouterStopCreateFW(cloudstackTestCase):
         #Create an account, network, VM and IP addresses
         cls.account = Account.create(
                                      cls.api_client,
-                                     cls.services["account"]
+                                     cls.services["account"],
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,

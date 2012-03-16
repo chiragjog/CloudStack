@@ -79,9 +79,6 @@ class Services:
                         "bootable": True,
                         "passwordenabled": True,
                         "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
-                        "zoneid": 'e6d7ae0b-072c-41e6-ac45-8e220f6a0cde',
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                         "mode": 'advanced',
                         # Networking mode: Advanced, basic
                         "sleep": 30,
@@ -132,7 +129,8 @@ class TestCreateTemplate(cloudstackTestCase):
 
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -294,12 +292,15 @@ class TestTemplates(cloudstackTestCase):
 
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            admin=True,
+                            domainid=cls.domain.id
                             )
 
         cls.user = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name

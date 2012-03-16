@@ -80,9 +80,6 @@ class Services:
             # CentOS 5.3 (64-bit)
             "sleep": 60,
             "timeout": 10,
-            "zoneid": '612d1366-2b53-4180-aac1-c77417ce8a55',
-            # Optional, if specified the mentioned zone will be
-            # used for tests
             "mode":'basic',
             # Networking mode: Basic or Advanced
         }
@@ -132,7 +129,8 @@ class TestDefaultSecurityGroup(cloudstackTestCase):
         cls.account = Account.create(
                             cls.api_client,
                             cls.services["account"],
-                            admin=True
+                            admin=True,
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -397,7 +395,8 @@ class TestAuthorizeIngressRule(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -530,7 +529,8 @@ class TestRevokeIngressRule(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -687,7 +687,8 @@ class TestDhcpOnlyRouter(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls.virtual_machine = VirtualMachine.create(
@@ -819,7 +820,8 @@ class TestdeployVMWithUserData(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
         cls._cleanup = [
@@ -975,7 +977,8 @@ class TestDeleteSecurityGroup(cloudstackTestCase):
                                             )
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=self.domain.id
                             )
         self.services["account"] = self.account.account.name
         self.cleanup = [
@@ -1216,7 +1219,8 @@ class TestIngressRule(cloudstackTestCase):
                                             )
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=self.domain.id
                             )
         self.services["account"] = self.account.account.name
         self.cleanup = [

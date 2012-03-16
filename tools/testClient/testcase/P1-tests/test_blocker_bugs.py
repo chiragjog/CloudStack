@@ -99,6 +99,7 @@ class TestSnapshots(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.disk_offering = DiskOffering.create(
                                     cls.api_client,
@@ -118,7 +119,8 @@ class TestSnapshots(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -377,7 +379,7 @@ class TestSnapshots(cloudstackTestCase):
             ssh_client.execute(c)
         return
 
-@unittest.skip("Open Questions")
+
 class TestTemplate(cloudstackTestCase):
 
     def setUp(self):
@@ -403,6 +405,7 @@ class TestTemplate(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.services["templates"]["zoneid"] = cls.zone.id
@@ -413,7 +416,8 @@ class TestTemplate(cloudstackTestCase):
                                             )
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
         cls.services["account"] = cls.account.account.name
 
@@ -449,6 +453,7 @@ class TestTemplate(cloudstackTestCase):
         template = Template.register(
                                     self.apiclient,
                                     self.services["templates"],
+                                    zoneid=self.zone.id,
                                     account=self.account.account.name,
                                     domainid=self.account.account.domainid
                                     )
@@ -519,6 +524,7 @@ class TestNATRules(cloudstackTestCase):
         cls.services = Services().services
 
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -529,7 +535,8 @@ class TestNATRules(cloudstackTestCase):
         cls.account = Account.create(
                                 cls.api_client,
                                 cls.services["account"],
-                                admin=True
+                                admin=True,
+                                domainid=cls.domain.id
                                 )
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.service_offering = ServiceOffering.create(
@@ -833,6 +840,7 @@ class TestRouterRestart(cloudstackTestCase):
         cls.api_client = fetch_api_client()
         cls.services = Services().services
         # Get Zone, Domain and templates
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
         template = get_template(
                             cls.api_client,
@@ -844,7 +852,8 @@ class TestRouterRestart(cloudstackTestCase):
         #Create an account, network, VM and IP addresses
         cls.account = Account.create(
                                      cls.api_client,
-                                     cls.services["account"]
+                                     cls.services["account"],
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -959,6 +968,7 @@ class TestTemplates(cloudstackTestCase):
         cls.api_client = fetch_api_client()
 
         # Get Zone, templates etc
+        cls.domain = get_domain(cls.api_client, cls.services)
         cls.zone = get_zone(cls.api_client, cls.services)
 
         template = get_template(
@@ -969,7 +979,8 @@ class TestTemplates(cloudstackTestCase):
         cls.services["virtual_machine"]["zoneid"] = cls.zone.id
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name

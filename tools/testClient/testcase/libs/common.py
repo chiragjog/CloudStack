@@ -127,10 +127,10 @@ def download_systemplates_sec_storage(server, services):
         raise Exception("Failed to download System Templates on Sec Storage")
     return
 
-def wait_for_ssvms(apiclient, zoneid, podid):
+def wait_for_ssvms(apiclient, zoneid, podid, interval=60):
     """After setup wait for SSVMs to come Up"""
 
-    time.sleep(60)
+    time.sleep(interval)
     timeout = 40
     while True:
             list_ssvm_response = list_ssvms(
@@ -142,7 +142,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
             ssvm = list_ssvm_response[0]
             if ssvm.state != 'Running':
                 # Sleep to ensure SSVMs are Up and Running
-                time.sleep(30)
+                time.sleep(interval)
                 timeout = timeout - 1
             elif ssvm.state == 'Running':
                 break
@@ -150,7 +150,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
                 raise Exception("SSVM failed to come up")
                 break
 
-    timeout = 20
+    timeout = 40
     while True:
             list_ssvm_response = list_ssvms(
                                         apiclient,
@@ -161,7 +161,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
             cpvm = list_ssvm_response[0]
             if cpvm.state != 'Running':
                 # Sleep to ensure SSVMs are Up and Running
-                time.sleep(30)
+                time.sleep(interval)
                 timeout = timeout - 1
             elif cpvm.state == 'Running':
                 break
@@ -170,7 +170,7 @@ def wait_for_ssvms(apiclient, zoneid, podid):
                 break
     return
 
-def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip):
+def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip, interval=60):
     """After setup wait till builtin templates are downloaded"""
     
     # Change IPTABLES Rules
@@ -182,7 +182,7 @@ def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip)
                                 linklocalip,
                                 "iptables -P INPUT ACCEPT"
                             )
-    time.sleep(60)
+    time.sleep(interval)
     # Find the BUILTIN Templates for given Zone, Hypervisor
     list_template_response = list_templates(
                                     apiclient,
@@ -202,7 +202,7 @@ def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip)
 
     # Sleep to ensure that template is in downloading state after adding
     # Sec storage
-    time.sleep(30)
+    time.sleep(interval)
     while True:
         template_response = list_templates(
                                     apiclient,
@@ -215,14 +215,15 @@ def download_builtin_templates(apiclient, zoneid, hypervisor, host, linklocalip)
         # template.status = Download Complete
         # Downloading - x% Downloaded
         # Error - Any other string 
-        if template.status == 'Download Complete'  :
+        if template.status == 'Download Complete':
             break
-        elif 'Downloaded' not in template.status.split() or \
-                     'Installing' not in template.status.split():
-            
+                
+        elif 'Downloaded' in template.status:
+            time.sleep(interval)
+
+        elif 'Installing' not in template.status:
             raise Exception("ErrorInDownload")
-        elif 'Downloaded' in template.status.split():
-            time.sleep(30)
+        
     return
 
 def update_resource_limit(apiclient, resourcetype, account=None, domainid=None,

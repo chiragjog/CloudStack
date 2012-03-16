@@ -139,7 +139,8 @@ class TestDeployVM(cloudstackTestCase):
         # Create Account, VMs, NAT Rules etc
         self.account = Account.create(
                             self.apiclient,
-                            self.services["account"]
+                            self.services["account"],
+                            domainid=domain.id
                             )
 
         self.service_offering = ServiceOffering.create(
@@ -239,7 +240,8 @@ class TestVMLifeCycle(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=domain.id
                             )
 
         cls.small_offering = ServiceOffering.create(
@@ -323,7 +325,7 @@ class TestVMLifeCycle(cloudstackTestCase):
         self.assertNotEqual(
                             len(list_vm_response),
                             0,
-                            "Check VM avaliable in List Virtual Machines"
+                            "Check VM available in List Virtual Machines"
                         )
 
         self.assertEqual(

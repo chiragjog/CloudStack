@@ -1006,7 +1006,7 @@ class TesttemplateHierarchy(cloudstackTestCase):
             )
         return
 
-@unittest.skip("Problem in cleanup")
+@unittest.skip("Open Questions")
 class TestAddVmToSubDomain(cloudstackTestCase):
 
     @classmethod
@@ -1170,7 +1170,8 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         ssvm_response = list_ssvms(
                                     cls.api_client,
                                     systemvmtype='secondarystoragevm',
-                                    hostid=cls.host.id
+                                    hostid=cls.host.id,
+                                    sleep=cls.services["sleep"]
                                 )
         if isinstance(ssvm_response, list):
             ssvm = ssvm_response[0]
@@ -1235,8 +1236,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                                     domainid=cls.account_2.account.domainid,
                                     serviceofferingid=cls.service_offering.id
                                     )
-        cls._cleanup = [
-                        ]
+        cls._cleanup = []
         return
 
     @classmethod
@@ -1245,16 +1245,16 @@ class TestAddVmToSubDomain(cloudstackTestCase):
             # Cleanup the accounts
             cls.account_1.delete(cls.api_client)
             cls.account_2.delete(cls.api_client)
-            
+
             cleanup_wait = list_configurations(
                                           cls.api_client,
                                           name='account.cleanup.interval'
                                           )
-            print cleanup_wait
-            print type(cleanup_wait)
-            # Sleep for account.cleanup.interval*3
+
+            # Sleep for account.cleanup.interval * 2 to wait for expunge of
+            # resources associated with that account
             if isinstance(cleanup_wait, list):
-                sleep_time = int(cleanup_wait[0].value) * 3
+                sleep_time = int(cleanup_wait[0].value) * 2
             
             time.sleep(sleep_time)
             
@@ -1278,7 +1278,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
                     cmd.id = ssvm.id
                     cls.api_client.destroySystemVm(cmd)
 
-            # Sleep for account.cleanup.interval*3 to wait for SSVM volume
+            # Sleep for account.cleanup.interval*2 to wait for SSVM volume
             # to cleanup
             time.sleep(sleep_time)
 
@@ -1312,6 +1312,7 @@ class TestAddVmToSubDomain(cloudstackTestCase):
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
+
 
     def test_01_add_vm_to_subdomain(self):
         """ Test Sub domain allowed to launch VM  when a Domain level zone is

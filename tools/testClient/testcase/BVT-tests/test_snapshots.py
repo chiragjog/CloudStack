@@ -129,7 +129,8 @@ class TestSnapshotRootDisk(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -351,7 +352,8 @@ class TestSnapshots(cloudstackTestCase):
         # Create VMs, NAT Rules etc
         cls.account = Account.create(
                             cls.api_client,
-                            cls.services["account"]
+                            cls.services["account"],
+                            domainid=cls.domain.id
                             )
 
         cls.services["account"] = cls.account.account.name
@@ -521,7 +523,7 @@ class TestSnapshots(cloudstackTestCase):
                 self.debug(c)
                 result = ssh_client.execute(c)
                 self.debug(result)
-                
+
         except Exception as e:
             self.fail("SSH failed for VM with IP: %s" %
                                 self.virtual_machine_with_disk.ipaddress)

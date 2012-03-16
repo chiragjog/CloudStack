@@ -74,7 +74,8 @@ class TestRouterServices(cloudstackTestCase):
         #Create an account, network, VM and IP addresses
         cls.account = Account.create(
                                      cls.api_client,
-                                     cls.services["account"]
+                                     cls.services["account"],
+                                     domainid=cls.domain.id
                                      )
         cls.service_offering = ServiceOffering.create(
                                             cls.api_client,
@@ -752,7 +753,7 @@ class TestRouterServices(cloudstackTestCase):
                         )
         response = config[0]
 
-        # Wait for network.gc.interval * 3 time
+        # Wait for network.gc.interval * 3 time to cleanup all the resources
         time.sleep(int(response.value) * 3)
         
         timeout = self.services["timeout"]
