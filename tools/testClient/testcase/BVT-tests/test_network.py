@@ -22,7 +22,7 @@ class Services:
 
     def __init__(self):
         self.services = {
-                            "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                            "ostypeid": '471a4b5b-5523-448f-9608-7d6218995733',
                             # Cent OS 5.3 (64 bit)
                             "mode": 'advanced',
                             # Networking mode: Basic or advanced
@@ -30,10 +30,23 @@ class Services:
                             # Time interval after which LB switches the requests
                             "sleep": 60,
                             "timeout":10,
+                            "network_offering": {
+                                    "name": 'Test Network offering',
+                                    "displaytext": 'Test Network offering',
+                                    "guestiptype": 'Isolated',
+                                    "supportedservices": 'Dhcp,Dns,SourceNat,PortForwarding',
+                                    "traffictype": 'GUEST',
+                                    "availability": 'Optional',
+                                    "serviceProviderList" : {
+                                            "Dhcp": 'VirtualRouter',
+                                            "Dns": 'VirtualRouter',
+                                            "SourceNat": 'VirtualRouter',
+                                            "PortForwarding": 'VirtualRouter',
+                                        },
+                                },
                             "network": {
                                   "name": "Test Network",
                                   "displaytext": "Test Network",
-                                  "networkoffering": '3d4e36f1-6b5f-40fc-bb63-fe9353419e91',
                                 },
                             "service_offering": {
                                     "name": "Tiny Instance",
@@ -107,6 +120,15 @@ class TestPublicIP(cloudstackTestCase):
                             domainid=cls.domain.id
                             )
         cls.services["network"]["zoneid"] = cls.zone.id
+
+        cls.network_offering = NetworkOffering.create(
+                                    cls.api_client, 
+                                    cls.services["network_offering"],
+                                    )
+        # Enable Network offering
+        cls.network_offering.update(cls.api_client, state='Enabled')
+        
+        cls.services["network"]["networkoffering"] = cls.network_offering.id
         cls.account_network = Network.create(
                                              cls.api_client,
                                              cls.services["network"],
@@ -138,6 +160,7 @@ class TestPublicIP(cloudstackTestCase):
                         cls.user_network,
                         cls.account,
                         cls.user,
+                        cls.network_offering
                         ]
         return
 
