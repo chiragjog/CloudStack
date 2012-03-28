@@ -805,7 +805,7 @@ class FireWallRule:
         if endport:
             cmd.endport = endport
 
-        return NATRule(apiclient.createFirewallRule(cmd).__dict__)
+        return FireWallRule(apiclient.createFirewallRule(cmd).__dict__)
 
     def delete(self, apiclient):
         """Delete Firewall rule"""

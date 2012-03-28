@@ -431,3 +431,17 @@ def list_usage_records(apiclient, **kwargs):
     cmd = listUsageRecords.listUsageRecordsCmd()
     [setattr(cmd, k, v) for k, v in kwargs.items()]
     return(apiclient.listUsageRecords(cmd))
+
+def list_network_offerings(apiclient, **kwargs):
+    """Lists network offerings"""
+
+    cmd = listNetworkOfferings.listNetworkOfferingsCmd()
+    [setattr(cmd, k, v) for k, v in kwargs.items()]
+    return(apiclient.listNetworkOfferings(cmd))
+
+def list_resource_limits(apiclient, **kwargs):
+    """Lists resource limits"""
+
+    cmd = listResourceLimits.listResourceLimitsCmd()
+    [setattr(cmd, k, v) for k, v in kwargs.items()]
+    return(apiclient.listResourceLimits(cmd))

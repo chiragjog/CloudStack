@@ -103,7 +103,6 @@ class Services:
             "mount_dir": "/mnt/tmp",
             "sleep": 60,
             "timeout": 10,
-            "hostid": 5,
             #Migrate VM to hostid
             "ostypeid": 12,
             # CentOS 5.3 (64-bit)
@@ -680,7 +679,6 @@ class TestVMLifeCycle(cloudstackTestCase):
                         )
         return
 
-
     def test_07_restore_vm(self):
         """Test recover Virtual Machine
         """
@@ -729,13 +727,36 @@ class TestVMLifeCycle(cloudstackTestCase):
         #    should be "Running" and the host should be the host 
         #    to which the VM was migrated to
         
+        hosts = Host.list(
+                          self.apiclient, 
+                          zoneid=self.medium_virtual_machine.zoneid,
+                          type='Routing'
+                          )
+        
+        self.assertEqual(
+                         isinstance(hosts, list), 
+                         True, 
+                         "Check the number of hosts in the zone"
+                         )
+        self.assertEqual(
+                len(hosts), 
+                2, 
+                "Atleast 2 hosts should be present in a zone for VM migration"
+                )
+
+        # Find the host of VM and also the new host to migrate VM.
+        if self.medium_virtual_machine.hostid == hosts[0].id:
+            host = hosts[1]
+        else:
+            host = host[0]
+        
         self.debug("Migrating VM-ID: %s to Host: %s" % (
                                         self.medium_virtual_machine.id,
-                                        self.services["hostid"]
+                                        host.id
                                         ))
         
         cmd = migrateVirtualMachine.migrateVirtualMachineCmd()
-        cmd.hostid = self.services["hostid"]
+        cmd.hostid = host.id
         cmd.virtualmachineid = self.medium_virtual_machine.id
         self.apiclient.migrateVirtualMachine(cmd)
 
@@ -765,7 +786,7 @@ class TestVMLifeCycle(cloudstackTestCase):
 
         self.assertEqual(
                             vm_response.hostid,
-                            self.services["hostid"],
+                            host.id,
                             "Check destination hostID of migrated VM"
                         )
         return

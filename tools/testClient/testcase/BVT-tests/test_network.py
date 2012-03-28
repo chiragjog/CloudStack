@@ -107,6 +107,16 @@ class TestPublicIP(cloudstackTestCase):
                             domainid=cls.domain.id
                             )
         cls.services["network"]["zoneid"] = cls.zone.id
+        network_offerings = list_network_offerings(
+                                                   cls.api_client,
+                                                   availability='Required',
+                                                   specifyvlan='false'
+                                                   )
+        if isinstance(network_offerings, list):
+             cls.services["network"]["networkoffering"] = network_offerings[0].id
+        else:
+            raise Exception("List network offerings call failed!")
+
         cls.account_network = Network.create(
                                              cls.api_client,
                                              cls.services["network"],
