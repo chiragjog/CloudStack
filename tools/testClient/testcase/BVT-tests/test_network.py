@@ -33,7 +33,6 @@ class Services:
                             "network": {
                                   "name": "Test Network",
                                   "displaytext": "Test Network",
-                                  "networkoffering": 6,
                                 },
                             "service_offering": {
                                     "name": "Tiny Instance",
@@ -41,7 +40,7 @@ class Services:
                                     "cpunumber": 1,
                                     "cpuspeed": 100,
                                     # in MHz
-                                    "memory": 256,
+                                    "memory": 64,
                                     # In MBs
                                     },
                             "account": {
@@ -87,7 +86,7 @@ class TestPublicIP(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestPublicIP, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -266,7 +265,7 @@ class TestPortForwarding(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestPortForwarding, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
 
         # Get Zone, Domain and templates
@@ -311,7 +310,7 @@ class TestPortForwarding(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestPortForwarding, cls).getClsTestClient().getApiClient()
             cleanup_resources(cls.api_client, cls._cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
@@ -546,7 +545,7 @@ class TestLoadBalancingRule(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestLoadBalancingRule, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)

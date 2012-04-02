@@ -71,7 +71,7 @@ class TestCreateVolume(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestCreateVolume, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
 
         # Get Zone, Domain and templates
@@ -249,7 +249,7 @@ class TestCreateVolume(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestCreateVolume, cls).getClsTestClient().getApiClient()
             cleanup_resources(cls.api_client, cls._cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
@@ -259,7 +259,7 @@ class TestVolumes(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestVolumes, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)

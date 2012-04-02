@@ -46,9 +46,6 @@ class Services:
                                 "hypervisor": 'XEN',
                             },
                         },
-                        "zoneid": 2,
-                        # Optional, if specified the mentioned zone will be
-                        # used for tests
                  }
 
 class TestPrimaryStorageServices(cloudstackTestCase):

@@ -78,9 +78,6 @@ class Services:
                                           "password": "fr3sca",
                                          },
                                  },
-                         "zoneid": 2,
-                         # Optional, if specified the mentioned zone will be
-                         # used for tests
                        }
 
 class TestHosts(cloudstackTestCase):

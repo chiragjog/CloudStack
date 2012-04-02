@@ -46,7 +46,10 @@ class TestSecStorageServices(cloudstackTestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestSecStorageServices,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         cls._cleanup = []
         return

@@ -109,7 +109,7 @@ class TestCreateTemplate(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
         cls.services = Services().services
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestCreateTemplate, cls).getClsTestClient().getApiClient()
 
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -136,7 +136,7 @@ class TestCreateTemplate(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestCreateTemplate, cls).getClsTestClient().getApiClient()
             #Cleanup resources used
             cleanup_resources(cls.api_client, cls._cleanup)
 
@@ -264,7 +264,7 @@ class TestTemplates(cloudstackTestCase):
     def setUpClass(cls):
 
         cls.services = Services().services
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestTemplates, cls).getClsTestClient().getApiClient()
 
         # Get Zone, templates etc
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -334,7 +334,7 @@ class TestTemplates(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestTemplates, cls).getClsTestClient().getApiClient()
             #Cleanup created resources such as templates and VMs
             cleanup_resources(cls.api_client, cls._cleanup)
 

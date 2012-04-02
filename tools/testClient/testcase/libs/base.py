@@ -631,7 +631,11 @@ class Iso:
                 # or ISO is 'Successfully Installed'
                 if response.status == 'Successfully Installed':
                     return
-                elif 'Downloaded' not in response.status:
+
+                elif 'Downloaded' in response.status:
+                    time.sleep(interval)
+
+                elif 'Installing' not in response.status:
                     raise Exception("ErrorInDownload")
 
             elif timeout == 0:

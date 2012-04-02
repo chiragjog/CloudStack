@@ -110,7 +110,7 @@ class TestSnapshotRootDisk(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestSnapshotRootDisk, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -260,25 +260,26 @@ class TestSnapshotRootDisk(cloudstackTestCase):
                             True,
                             "Check list response returns a valid list"
                         )
+        uuids = []
+        for host in hosts:
+            # hosts[0].name = "nfs://192.168.100.21/export/test"
+            parse_url = (host.name).split('/')
+            # parse_url = ['nfs:', '', '192.168.100.21', 'export', 'test']
 
-        # hosts[0].name = "nfs://192.168.100.21/export/test"
-        parse_url = (hosts[0].name).split('/')
-        # parse_url = ['nfs:', '', '192.168.100.21', 'export', 'test']
+            # Split IP address and export path from name
+            sec_storage_ip = parse_url[2]
+            # Sec Storage IP: 192.168.100.21
 
-        # Split IP address and export path from name
-        sec_storage_ip = parse_url[2]
-        # Sec Storage IP: 192.168.100.21
+            export_path = '/'.join(parse_url[3:])
+            # Export path: export/test
 
-        export_path = '/'.join(parse_url[3:])
-        # Export path: export/test
+            try:
+                # Login to VM to check snapshot present on sec disk
+                ssh_client = self.virtual_machine_with_disk.get_ssh_client()
 
-        try:
-            # Login to VM to check snapshot present on sec disk
-            ssh_client = self.virtual_machine_with_disk.get_ssh_client()
-
-            cmds = [
+                cmds = [
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -290,32 +291,37 @@ class TestSnapshotRootDisk(cloudstackTestCase):
                                                ),
                     ]
 
-            for c in cmds:
-                result = ssh_client.execute(c)
+                for c in cmds:
+                    self.debug(c)
+                    result = ssh_client.execute(c)
+                    self.debug(result)
 
-        except Exception:
-            self.fail("SSH failed for Virtual machine: %s" %
+            except Exception:
+                self.fail("SSH failed for Virtual machine: %s" %
                                 self.virtual_machine_with_disk.ipaddress)
 
-        res = str(result)
+            uuids.append(result)
+            # Unmount the Sec Storage
+            cmds = [
+                    "umount %s" % (self.services["mount_dir"]),
+                    ]
+            try:
+                for c in cmds:
+                    self.debug(c)
+                    result = ssh_client.execute(c)
+                    self.debug(result)
+
+            except Exception as e:
+                self.fail("SSH failed for Virtual machine: %s" %
+                                self.virtual_machine_with_disk.ipaddress)
+        
+        res = str(uuids)
         # Check snapshot UUID in secondary storage and database
         self.assertEqual(
                         res.count(snapshot_uuid),
                         1,
                         "Check snapshot UUID in secondary storage and database"
                         )
-        # Unmount the Sec Storage
-        cmds = [
-                    "umount %s" % (self.services["mount_dir"]),
-                ]
-        try:
-            for c in cmds:
-                result = ssh_client.execute(c)
-
-        except Exception as e:
-            self.fail("SSH failed for Virtual machine: %s" %
-                                self.virtual_machine_with_disk.ipaddress)
-
         return
 
 
@@ -323,7 +329,7 @@ class TestSnapshots(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestSnapshots, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -488,25 +494,26 @@ class TestSnapshots(cloudstackTestCase):
                             True,
                             "Check list response returns a valid list"
                         )
+        uuids = []
+        for host in hosts:
+            # hosts[0].name = "nfs://192.168.100.21/export"
+            parse_url = (host.name).split('/')
+            # parse_url = ['nfs:', '', '192.168.100.21', 'export']
 
-        # hosts[0].name = "nfs://192.168.100.21/export"
-        parse_url = (hosts[0].name).split('/')
-        # parse_url = ['nfs:', '', '192.168.100.21', 'export']
+            # Split IP address and export path from name
+            sec_storage_ip = parse_url[2]
+            # Sec Storage IP: 192.168.100.21
 
-        # Split IP address and export path from name
-        sec_storage_ip = parse_url[2]
-        # Sec Storage IP: 192.168.100.21
+            export_path = '/'.join(parse_url[3:])
+            # Export path: export
 
-        export_path = '/'.join(parse_url[3:])
-        # Export path: export
+            try:
+                # Login to VM to check snapshot present on sec disk
+                ssh_client = self.virtual_machine_with_disk.get_ssh_client()
 
-        try:
-            # Login to VM to check snapshot present on sec disk
-            ssh_client = self.virtual_machine_with_disk.get_ssh_client()
-
-            cmds = [
+                cmds = [
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -517,34 +524,36 @@ class TestSnapshots(cloudstackTestCase):
                                                volume_id
                                                ),
                 ]
-            for c in cmds:
-                self.debug(c)
-                result = ssh_client.execute(c)
-                self.debug(result)
+                for c in cmds:
+                    self.debug(c)
+                    result = ssh_client.execute(c)
+                    self.debug(result)
 
-        except Exception as e:
-            self.fail("SSH failed for VM with IP: %s" %
+            except Exception as e:
+                self.fail("SSH failed for VM with IP: %s" %
                                 self.virtual_machine_with_disk.ipaddress)
 
-        res = str(result)
+            uuids.append(result)
+            # Unmount the Sec Storage
+            cmds = [
+                    "umount %s" % (self.services["mount_dir"]),
+                    ]
+            try:
+                for c in cmds:
+                    self.debug(c)
+                    ssh_client.execute(c)
+
+            except Exception as e:
+                self.fail("SSH failed for VM with IP: %s" %
+                                self.virtual_machine_with_disk.ipaddress)
+
+        res = str(uuids)
         # Check snapshot UUID in secondary storage and database
         self.assertEqual(
                         res.count(snapshot_uuid),
                         1,
                         "Check snapshot UUID in secondary storage and database"
                         )
-        # Unmount the Sec Storage
-        cmds = [
-                    "umount %s" % (self.services["mount_dir"]),
-                ]
-        try:
-            for c in cmds:
-                ssh_client.execute(c)
-
-        except Exception as e:
-            self.fail("SSH failed for VM with IP: %s" %
-                                self.virtual_machine_with_disk.ipaddress)
-
         return
 
     def test_03_volume_from_snapshot(self):
@@ -594,6 +603,7 @@ class TestSnapshots(cloudstackTestCase):
                                             ),
                 ]
             for c in cmds:
+                self.debug(c)
                 ssh_client.execute(c)
 
         except Exception as e:
@@ -606,6 +616,7 @@ class TestSnapshots(cloudstackTestCase):
 
         try:
             for c in cmds:
+                self.debug(c)
                 ssh_client.execute(c)
 
         except Exception as e:
@@ -680,7 +691,9 @@ class TestSnapshots(cloudstackTestCase):
                ]
 
             for c in cmds:
-                ssh.execute(c)
+                self.debug(c)
+                result = ssh.execute(c)
+                self.debug(result)
 
             returned_data_0 = ssh.execute("cat %s/%s/%s/%s" % (
                                                 self.services["mount_dir"],
@@ -989,7 +1002,9 @@ class TestSnapshots(cloudstackTestCase):
                 ]
 
             for c in cmds:
-                ssh_client.execute(c)
+                self.debug(c)
+                result = ssh_client.execute(c)
+                self.debug(result)
 
         except Exception as e:
             self.fail("SSH failed for VM with IP address: %s" %
@@ -1000,6 +1015,7 @@ class TestSnapshots(cloudstackTestCase):
                     "umount %s" % (self.services["mount_dir"]),
                 ]
         for c in cmds:
+            self.debug(c)
             ssh_client.execute(c)
 
         volumes = list_volumes(
@@ -1086,13 +1102,14 @@ class TestSnapshots(cloudstackTestCase):
                                                 self.services["sub_lvl_dir1"],
                                                 self.services["random_data"]
                                     ))
+            self.debug(returned_data_0)
             returned_data_1 = ssh.execute("cat %s/%s/%s/%s" % (
                                                 self.services["mount_dir"],
                                                 self.services["sub_dir"],
                                                 self.services["sub_lvl_dir2"],
                                                 self.services["random_data"]
                                     ))
-
+            self.debug(returned_data_1)
         except Exception as e:
             self.fail("SSH failed for VM with IP address: %s" %
                                     new_virtual_machine.ipaddress)
@@ -1113,6 +1130,7 @@ class TestSnapshots(cloudstackTestCase):
                 ]
         try:
             for c in cmds:
+                self.debug(c)
                 ssh_client.execute(c)
 
         except Exception as e:
