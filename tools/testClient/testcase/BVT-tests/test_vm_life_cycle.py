@@ -110,7 +110,7 @@ class Services:
             # Networking mode: Basic or Advanced
         }
 
-@unittest.skip("skipping")
+
 class TestDeployVM(cloudstackTestCase):
 
     def setUp(self):
@@ -298,7 +298,7 @@ class TestVMLifeCycle(cloudstackTestCase):
         #Clean up, terminate the created ISOs
         cleanup_resources(self.apiclient, self.cleanup)
         return
-    @unittest.skip("skipping")
+
     def test_01_stop_vm(self):
         """Test Stop Virtual Machine
         """
@@ -333,7 +333,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                             "Check virtual machine is in stopped state"
                         )
         return
-    @unittest.skip("skipping")
+
     def test_02_start_vm(self):
         """Test Start Virtual Machine
         """
@@ -370,7 +370,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                             "Check virtual machine is in running state"
                         )
         return
-    @unittest.skip("skipping")
+
     def test_03_reboot_vm(self):
         """Test Reboot Virtual Machine
         """
@@ -405,7 +405,7 @@ class TestVMLifeCycle(cloudstackTestCase):
                             "Check virtual machine is in running state"
                         )
         return
-    @unittest.skip("skipping")
+
     def test_04_change_offering_small(self):
         """Change Offering to a small capacity
         """

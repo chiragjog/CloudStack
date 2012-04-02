@@ -332,7 +332,7 @@ class TestCreateVMsnapshotTemplate(cloudstackTestCase):
 
                 cmds = [    
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -590,7 +590,7 @@ class TestAccountSnapshotClean(cloudstackTestCase):
 
                 cmds = [
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -664,7 +664,7 @@ class TestAccountSnapshotClean(cloudstackTestCase):
 
             try:
                 cmds = [    
-                        "mount %s:/%s %s" % (
+                        "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -945,7 +945,7 @@ class TestSnapshotDetachedDisk(cloudstackTestCase):
 
                 cmds = [
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]
@@ -1191,7 +1191,7 @@ class TestSnapshotLimit(cloudstackTestCase):
 
                 cmds = [
                     "mkdir -p %s" % self.services["mount_dir"],
-                    "mount %s:/%s %s" % (
+                    "mount %s/%s %s" % (
                                          sec_storage_ip,
                                          export_path,
                                          self.services["mount_dir"]

@@ -728,8 +728,7 @@ class TestRouterServices(cloudstackTestCase):
         list_vms = list_virtual_machines(
                                          self.apiclient,
                                          account=self.account.account.name,
-                                         domainid=self.account.account.domainid,
-                                         listall=True
+                                         domainid=self.account.account.domainid
                                          )
         self.assertEqual(
                             isinstance(list_vms, list),
