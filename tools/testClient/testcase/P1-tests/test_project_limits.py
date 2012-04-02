@@ -86,7 +86,10 @@ class TestProjectLimits(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestProjectLimits, 
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -97,7 +100,7 @@ class TestProjectLimits(cloudstackTestCase):
                                    cls.services["domain"]
                                    )
 
-        cls.account = Account.create(
+        cls.admin = Account.create(
                             cls.api_client,
                             cls.services["account"],
                             admin=True,
@@ -139,17 +142,25 @@ class TestProjectLimits(cloudstackTestCase):
         """
 
         # Validate the following
-        # 1. Create multiple project. Verify at step 1 An account is allowed
-        #    to create multiple projects 
-        # 2. add one account to multiple project. Verify at step 2 an account
-        #    is allowed to added to multiple project
+        # 1. Create a Project. Verify once projects are created, they inherit
+        #    a default set of resource limits as configured by the Cloud Stack
+        #    ROOT admin.
+        # 2. Reduce Project resources limits. Verify limits can be reduced by
+        #    the Project Owner of each project and project limit applies to
+        #    number of virtual instances, disk volumes, snapshots, IP address.
+        #    Also, verify resource limits for the project are independent of
+        #    account resource limits
+        # 3. Increase Projects Resources limits above domains limit. Verify
+        #    project can’t have more resources than domain level limit allows.
+        # 4. Create Resource more than its set limit for a project. Verify
+        #    resource allocation should fail giving proper message
 
         # Create project as a domain admin
         project = Project.create(
                                  self.apiclient,
                                  self.services["project"],
-                                 account=self.account.account.name,
-                                 domainid=self.account.account.domainid
+                                 account=self.admin.account.name,
+                                 domainid=self.admin.account.domainid
                                  )
         # Cleanup created project at end of test
         self.cleanup.append(project)
@@ -278,17 +289,18 @@ class TestProjectLimits(cloudstackTestCase):
         """
 
         # Validate the following
-        # 1. Create multiple project. Verify at step 1 An account is allowed
-        #    to create multiple projects 
-        # 2. add one account to multiple project. Verify at step 2 an account
-        #    is allowed to added to multiple project
+        # 1. Create a Project
+        # 2. Reduce the projects limits as a domain admin. Verify resource
+        #    count is updated
+        # 3. Reduce the projects limits as a project user owner who is not a
+        #    domain admin. Resource count should fail
 
         # Create project as a domain admin
         project = Project.create(
                                  self.apiclient,
                                  self.services["project"],
-                                 account=self.account.account.name,
-                                 domainid=self.account.account.domainid
+                                 account=self.admin.account.name,
+                                 domainid=self.admin.account.domainid
                                  )
         # Cleanup created project at end of test
         self.cleanup.append(project)
@@ -422,7 +434,7 @@ class TestResourceLimitsDomain(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestResourceLimitsDomain, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -648,9 +660,9 @@ class TestResourceLimitsDomain(cloudstackTestCase):
 
         # Validate the following
         # 1. set max no of snapshots per project to 1.
-        # 2. Create one snapshot in the project. Snapshot should be successfully
-        #    created
-        # 5. Try to create another snapshot in this project. It should give the
+        # 2. Create one snapshot in the project. Snapshot should be
+        #    successfully created
+        # 5. Try to create another snapshot in this project. It should give      
         #    user an appropriate error and an alert should be generated.
 
         self.debug(
@@ -776,7 +788,7 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         # 1. set max no of templates per project to 1.
         # 2. Create a template in this project. Both template should be in
         #    ready state
-        # 3. Try create 2nd template in the project. It should give the user an
+        # 3. Try create 2nd template in the project. It should give the user
         #    appropriate error and an alert should be generated.
 
         self.debug(

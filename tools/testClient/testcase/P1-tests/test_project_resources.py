@@ -126,7 +126,10 @@ class TestOfferings(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestOfferings,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone and template
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -221,8 +224,6 @@ class TestOfferings(cloudstackTestCase):
                                 serviceofferingid=self.service_offering.id,
                                 projectid=project.id
                                 )
-        self.cleanup.append(virtual_machine)
-
         # Verify VM state
         self.assertEqual(
                             virtual_machine.state,
@@ -238,9 +239,9 @@ class TestOfferings(cloudstackTestCase):
 
         # Validate the following
         # 1. Create a project.
-        # 2. List service offerings for the project. All DO available in the
-        #    domain can be used for project resource creation.
-        
+        # 2. List service offerings for the project. All disk offerings
+        #    available in the domain can be used for project resource creation
+
         # Create project as a domain admin
         project = Project.create(
                                  self.apiclient,
@@ -304,7 +305,10 @@ class TestNetwork(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestNetwork,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone and template
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -488,7 +492,10 @@ class TestTemplates(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestTemplates,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -627,7 +634,7 @@ class TestTemplates(cloudstackTestCase):
 
         # Validate the following 
         # 1. Create a project
-        # 2. Verify that in order to use somebody’s Private template for  vm
+        # 2. Verify that in order to use somebody’s Private template for vm
         #    creation in the project, permission to use the template has to
         #    be granted to the Project (use API “updateTemplatePermissions”
         #    with project id to achieve that).
@@ -716,7 +723,10 @@ class TestSnapshots(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestSnapshots,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -858,7 +868,10 @@ class TestPublicIpAddress(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestPublicIpAddress,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -1154,7 +1167,10 @@ class TestSecurityGroup(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
         cls.services = Services().services
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestSecurityGroup,
+                               cls
+                               ).getClsTestClient().getApiClient()
 
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -1198,7 +1214,7 @@ class TestSecurityGroup(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestSecurityGroup, cls).getClsTestClient().getApiClient()
             #Cleanup resources used
             cleanup_resources(cls.api_client, cls._cleanup)
 
@@ -1212,10 +1228,10 @@ class TestSecurityGroup(cloudstackTestCase):
         """
 
         # Validate the following:
-        #1. Create a project
-        #2. Assign some security groups to that project
-        #3. Verify the security groups can only be assigned to VM belonging to
-        #   that project.
+        # 1. Create a project
+        # 2. Assign some security groups to that project
+        # 3. Verify the security groups can only be assigned to VM belonging
+        #    to that project.
 
         security_group = SecurityGroup.create(
                                               self.apiclient, 

@@ -22,7 +22,7 @@ class Services:
 
     def __init__(self):
         self.services = {
-                            "ostypeid": '471a4b5b-5523-448f-9608-7d6218995733',
+                            "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
                             # Cent OS 5.3 (64 bit)
                             "mode": 'advanced',
                             # Networking mode: Basic or advanced
@@ -100,7 +100,7 @@ class TestPublicIP(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestPublicIP, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)
@@ -279,7 +279,7 @@ class TestPortForwarding(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestPortForwarding, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
 
         # Get Zone, Domain and templates
@@ -324,7 +324,7 @@ class TestPortForwarding(cloudstackTestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            cls.api_client = fetch_api_client()
+            cls.api_client = super(TestPortForwarding, cls).getClsTestClient().getApiClient()
             cleanup_resources(cls.api_client, cls._cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
@@ -559,7 +559,7 @@ class TestLoadBalancingRule(cloudstackTestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestLoadBalancingRule, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, Domain and templates
         cls.domain = get_domain(cls.api_client, cls.services)

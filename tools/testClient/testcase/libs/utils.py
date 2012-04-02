@@ -70,7 +70,6 @@ def fetch_latest_mail(services, from_mail):
     raw_email = data[0][1]
     email_message = email.message_from_string(raw_email)
     result = get_first_text_block(email_message)
-    print result
     return result
     
 def get_first_text_block(email_message_instance):

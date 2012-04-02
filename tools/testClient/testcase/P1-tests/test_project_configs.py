@@ -102,7 +102,10 @@ class TestUserProjectCreation(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestUserProjectCreation,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -163,19 +166,6 @@ class TestUserProjectCreation(cloudstackTestCase):
         # 2. Create a Project as domain admin
         # 3. Create a Project as domain user
         # 4. In both 2 and 3 project creation should be successful 
-
-#        Configurations.update(
-#                              self.apiclient,
-#                              name='allow.user.create.projects', 
-#                              value=True
-#                              )
-#
-#        self.debug("Updated 'allow.user.create.projects' to value True")
-
-#        # After updating the config. restart management server to reflect changes
-#        self.debug("Restarting management server")
-#        restart_mgmt_server(self.services["mgmt_server"])
-#        self.debug("Restart successful")
 
         configs = Configurations.list(
                                       self.apiclient,
@@ -261,7 +251,7 @@ class TestUserProjectCreation(cloudstackTestCase):
                         "Check list project response returns a valid project"
                         )
         return
-    @unittest.skip("Test fails- able to create project as a domain user")
+    @unittest.skip("Known bug-able to create project as a domain user")
     def test_02_user_project_creation(self):
         """Test create project as a domain admin and domain user
         """
@@ -271,20 +261,6 @@ class TestUserProjectCreation(cloudstackTestCase):
         # 2. Create a Project as domain admin. Project creation should be
         #    successful.
         # 3. Create a Project as domain user. Project creation should fail
-
-#        Configurations.update(
-#                              self.apiclient,
-#                              name='allow.user.create.projects', 
-#                              value='false'
-#                              )
-#
-#        self.debug("Updated 'allow.user.create.projects' to value True")
-
-#        # After updating the config. restart management server to reflect 
-#        # changes
-#        self.debug("Restarting management server")
-#        restart_mgmt_server(self.services["mgmt_server"])
-#        self.debug("Restart successful")
 
         configs = Configurations.list(
                                       self.apiclient,
@@ -354,7 +330,7 @@ class TestProjectInviteRequired(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestProjectInviteRequired, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -1160,7 +1136,7 @@ class TestProjectInviteRequired(cloudstackTestCase):
                             "Check for a valid list accounts response"
                             )
         return
-    
+    @unittest.skip("Requires SMPT configs")
     def test_09_invite_to_project_by_email(self):
         """Test invite user to project by email"""
         

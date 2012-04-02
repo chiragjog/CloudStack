@@ -95,7 +95,7 @@ class Services:
                     "name": "testISO",
                     "url": "http://iso.linuxquestions.org/download/504/1819/http/gd4.tuwien.ac.at/dsl-4.4.10.iso",
                      # Source URL where ISO is located
-                    "ostypeid": '144f66aa-7f74-4cfe-9799-80cc21439cb3',
+                    "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
                     "mode": 'HTTP_DOWNLOAD', # Downloading existing ISO 
                 },
             "diskdevice": '/dev/xvdd',
@@ -104,11 +104,9 @@ class Services:
             "sleep": 60,
             "timeout": 10,
             #Migrate VM to hostid
-            "ostypeid": '471a4b5b-5523-448f-9608-7d6218995733',
+            "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
             # CentOS 5.3 (64-bit)
-            "mode":'basic',
-            # Networking mode: Basic or Advanced
-            "zoneid": '85204de9-c876-426d-8cf9-6e931ce88983'
+            "mode":'advanced',
         }
 
 
@@ -218,7 +216,7 @@ class TestVMLifeCycle(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestVMLifeCycle, cls).getClsTestClient().getApiClient()
         cls.services = Services().services
 
         # Get Zone, Domain and templates
@@ -286,7 +284,7 @@ class TestVMLifeCycle(cloudstackTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(TestVMLifeCycle, cls).getClsTestClient().getApiClient()
         cleanup_resources(cls.api_client, cls._cleanup)
         return
 
@@ -749,7 +747,7 @@ class TestVMLifeCycle(cloudstackTestCase):
         if self.medium_virtual_machine.hostid == hosts[0].id:
             host = hosts[1]
         else:
-            host = host[0]
+            host = hosts[0]
         
         self.debug("Migrating VM-ID: %s to Host: %s" % (
                                         self.medium_virtual_machine.id,

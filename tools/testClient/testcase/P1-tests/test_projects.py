@@ -78,7 +78,7 @@ class Services:
                                     "publicport": 22,
                                     "protocol": 'TCP',
                          },
-                        "ostypeid": '471a4b5b-5523-448f-9608-7d6218995733',
+                        "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
                         # Cent OS 5.3 (64 bit)
                         "sleep": 60,
                         "timeout": 10,
@@ -90,7 +90,10 @@ class TestMultipleProjectCreation(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestMultipleProjectCreation,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -290,7 +293,10 @@ class TestCrossDomainAccountAdd(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestCrossDomainAccountAdd,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -346,8 +352,7 @@ class TestCrossDomainAccountAdd(cloudstackTestCase):
         return
 
     def test_02_cross_domain_account_add(self):
-        """ Verify an account can own multiple projects and can belong to
-            multiple projects
+        """ Verify No cross domain projects
         """
 
         # Validate the following
@@ -411,7 +416,10 @@ class TestDeleteAccountWithProject(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestDeleteAccountWithProject,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -505,12 +513,15 @@ class TestDeleteAccountWithProject(cloudstackTestCase):
                                     self.account.account.name)
         return
 
-
+@unittest.skip("Deleting domain doesn't cleanup account")
 class TestDeleteDomainWithProject(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestDeleteDomainWithProject,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -553,8 +564,8 @@ class TestDeleteDomainWithProject(cloudstackTestCase):
         return
 
     def test_04_delete_domain_with_project(self):
-        """ Test Verify delete domain with cleanup=true should delete
-            projects belonging to the doamin
+        """ Test Verify delete domain with cleanup=true should delete projects
+            belonging to the domain
         """
 
         # Validate the following
@@ -636,7 +647,10 @@ class TestProjectOwners(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestProjectOwners,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.domain = get_domain(
@@ -646,19 +660,19 @@ class TestProjectOwners(cloudstackTestCase):
         cls.zone = get_zone(cls.api_client, cls.services)
         
         # Create accounts
-        cls.account = Account.create(
+        cls.admin = Account.create(
                             cls.api_client,
                             cls.services["account"],
                             admin=True,
                             domainid=cls.domain.id
                             )
-        cls.new_account = Account.create(
+        cls.new_admin = Account.create(
                             cls.api_client,
                             cls.services["account"],
                             admin=True,
                             domainid=cls.domain.id
                             )
-        cls._cleanup = [cls.account, cls.new_account]
+        cls._cleanup = [cls.admin, cls.new_admin]
         return
 
     @classmethod
@@ -699,8 +713,8 @@ class TestProjectOwners(cloudstackTestCase):
         project = Project.create(
                                  self.apiclient,
                                  self.services["project"],
-                                 account=self.account.account.name,
-                                 domainid=self.account.account.domainid
+                                 account=self.admin.account.name,
+                                 domainid=self.admin.account.domainid
                                  )
         self.cleanup.append(project)
         # Cleanup created project at end of test
@@ -732,20 +746,20 @@ class TestProjectOwners(cloudstackTestCase):
                             "Check project name from list response"
                             )
         self.debug("Adding %s user to project: %s" % (
-                                                self.new_account.account.name,
+                                                self.new_admin.account.name,
                                                 project.name
                                                 ))
         # Add user to the project
         project.addAccount(
                            self.apiclient, 
-                           self.new_account.account.name, 
+                           self.new_admin.account.name, 
                            )
         
         # listProjectAccount to verify the user is added to project or not
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.new_account.account.name,
+                                        account=self.new_admin.account.name,
                                         )
         self.debug(accounts_reponse)
         self.assertEqual(
@@ -770,14 +784,14 @@ class TestProjectOwners(cloudstackTestCase):
         # Update the project with new admin
         project.update(
                        self.apiclient, 
-                       account=self.new_account.account.name
+                       account=self.new_admin.account.name
                        )
         
         # listProjectAccount to verify the user is new admin of the project
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.new_account.account.name,
+                                        account=self.new_admin.account.name,
                                         )
         self.debug(accounts_reponse)
         self.assertEqual(
@@ -803,7 +817,7 @@ class TestProjectOwners(cloudstackTestCase):
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.account.account.name,
+                                        account=self.admin.account.name,
                                         )
         self.debug(accounts_reponse)
         self.assertEqual(
@@ -840,8 +854,8 @@ class TestProjectOwners(cloudstackTestCase):
         project = Project.create(
                                  self.apiclient,
                                  self.services["project"],
-                                 account=self.account.account.name,
-                                 domainid=self.account.account.domainid
+                                 account=self.admin.account.name,
+                                 domainid=self.admin.account.domainid
                                  )
         # Cleanup created project at end of test
         self.cleanup.append(project)
@@ -882,20 +896,20 @@ class TestProjectOwners(cloudstackTestCase):
                             "Check project name from list response"
                             )
         self.debug("Adding %s user to project: %s" % (
-                                                self.new_account.account.name,
+                                                self.new_admin.account.name,
                                                 project.name
                                                 ))
         # Add user to the project
         project.addAccount(
                            self.apiclient, 
-                           self.new_account.account.name, 
+                           self.new_admin.account.name, 
                            )
         
         # listProjectAccount to verify the user is added to project or not
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.new_account.account.name,
+                                        account=self.new_admin.account.name,
                                         )
         self.debug(accounts_reponse)
         self.assertEqual(
@@ -917,18 +931,18 @@ class TestProjectOwners(cloudstackTestCase):
                             "Newly added user is not added as a regular user"
                             )
         self.debug("Updating project with new Admin: %s" % 
-                                                self.new_account.account.name)
+                                                self.new_admin.account.name)
         # Update the project with new admin
         project.update(
                        self.apiclient, 
-                       account=self.new_account.account.name
+                       account=self.new_admin.account.name
                        )
         
         # listProjectAccount to verify the user is new admin of the project
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.new_account.account.name,
+                                        account=self.new_admin.account.name,
                                         )
         self.assertEqual(
                             isinstance(accounts_reponse, list),
@@ -1023,7 +1037,7 @@ class TestProjectOwners(cloudstackTestCase):
         accounts_reponse = Project.listAccounts(
                                         self.apiclient, 
                                         projectid=project.id,
-                                        account=self.new_account.account.name,
+                                        account=self.new_admin.account.name,
                                         )
         self.assertEqual(
                             isinstance(accounts_reponse, list),
@@ -1050,7 +1064,10 @@ class TestProjectResources(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestProjectResources,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone
         cls.zone = get_zone(cls.api_client, cls.services)
@@ -1265,6 +1282,13 @@ class TestProjectResources(cloudstackTestCase):
                             list_project.name,
                             "Check project name from list response"
                             )
+        self.user = Account.create(
+                                   self.apiclient,
+                                   self.services["account"],
+                                   admin=True,
+                                   domainid=self.domain.id
+                                   )
+        self.cleanup.append(self.user)
         self.debug("Adding %s user to project: %s" % (
                                                 self.user.account.name,
                                                 project.name
@@ -1272,7 +1296,7 @@ class TestProjectResources(cloudstackTestCase):
         # Add user to the project
         project.addAccount(
                            self.apiclient, 
-                           self.user.account.name, 
+                           self.user.account.name
                            )
         
         # listProjectAccount to verify the user is added to project or not
@@ -1338,7 +1362,10 @@ class TestProjectSuspendActivate(cloudstackTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.api_client = fetch_api_client()
+        cls.api_client = super(
+                               TestProjectSuspendActivate,
+                               cls
+                               ).getClsTestClient().getApiClient()
         cls.services = Services().services
         # Get Zone, domain, template etc
         cls.zone = get_zone(cls.api_client, cls.services)

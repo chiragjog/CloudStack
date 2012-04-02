@@ -1,7 +1,6 @@
 import urllib2
 import urllib
 import base64
-import copy
 import hmac
 import hashlib
 import json
@@ -46,20 +45,19 @@ class cloudConnection(object):
         
         requestUrl = "&".join(["=".join([r[0], urllib.quote_plus(str(r[1]))]) for r in request])
         hashStr = "&".join(["=".join([str.lower(r[0]), str.lower(urllib.quote_plus(str(r[1]))).replace("+", "%20")]) for r in request])
-
         sig = urllib.quote_plus(base64.encodestring(hmac.new(self.securityKey, hashStr, hashlib.sha1).digest()).strip())
         requestUrl += "&signature=%s"%sig
 
         try:
             self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
-            self.logging.debug("sending request: %s"%requestUrl)
+            self.logging.debug("sending GET request: %s"%requestUrl)
             response = self.connection.read()
-            self.logging.debug("got response: %s"%response)
+            self.logging.info("got response: %s"%response)
         except IOError, e:
             if hasattr(e, 'reason'):
-                self.logging.debug("failed to reach %s because of %s"%(self.mgtSvr, e.reason))
+                self.logging.critical("failed to reach %s because of %s"%(self.mgtSvr, e.reason))
             elif hasattr(e, 'code'):
-                self.logging.debug("server returned %d error code"%e.code)
+                self.logging.critical("server returned %d error code"%e.code)
         except HTTPException, h:
             self.logging.debug("encountered http Exception %s"%h.args)
             if self.retries > 0:
@@ -76,11 +74,10 @@ class cloudConnection(object):
         requests["response"] = "json" 
         requests = zip(requests.keys(), requests.values())
         requestUrl = "&".join(["=".join([request[0], urllib.quote_plus(str(request[1]))]) for request in requests])
-
         self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
-        self.logging.debug("sending request without auth: %s"%requestUrl)
+        self.logging.debug("sending GET request without auth: %s"%requestUrl)
         response = self.connection.read()
-        self.logging.debug("got response: %s"%response)
+        self.logging.info("got response: %s"%response)
         return response
     
     def pollAsyncJob(self, jobId, response):
@@ -136,7 +133,7 @@ class cloudConnection(object):
                             i = i + 1
         
         if self.logging is not None:
-            self.logging.debug("sending command: %s %s"%(commandName, str(requests)))
+            self.logging.info("sending command: %s %s"%(commandName, str(requests)))
         result = None
         if self.auth:
             result = self.make_request_with_auth(commandName, requests)
@@ -145,8 +142,6 @@ class cloudConnection(object):
         
         if result is None:
             return None
-        if self.logging is not None:
-            self.logging.debug("got result: "  + result)
         
         result = jsonHelper.getResultObj(result, response)
         if raw or isAsync == "false":
