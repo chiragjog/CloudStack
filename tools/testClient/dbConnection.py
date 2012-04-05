@@ -33,7 +33,21 @@ class dbConnection(object):
         resultRow = []
         cursor = None
         try:
-            cursor = self.db.cursor()
+
+            # The cloudstackConnection object provides a database connection to execute
+            # queries from the test cases. While running multiple tests, the first
+            # database query returns valid data, while the rest of the queries in other
+            # test cases returns empty lists. The reason being that  probably after querying
+            # an InnoDB table, the Cloudstack server inserts new data in the meantime. If
+            # that is the case, the MySQL sever automatically starts a new transaction for
+            # the already open connection, and since we don't call dbConnection.commit() or
+            # .rollback()anywhere, that connection is forever stuck in that transaction. InnoDB's
+            # default settings make sure that whenever we query data, we'll always see the same
+            # result within one transaction. So whatever some other process is inserting into
+            # the table is hidden from this thread's  connection.
+            self.db.commit()
+
+	    cursor = self.db.cursor()
             cursor.execute(sql)
         
             result = cursor.fetchall()
@@ -42,12 +56,13 @@ class dbConnection(object):
                     resultRow.append(r)
             return resultRow
         except pymysql.MySQLError, e:
-            raise cloudstackException.dbException("db Exception:%s"%e[1]) 
+            raise cloudstackException.dbException("db Exception:%s"%e) 
         except:
             raise cloudstackException.internalError(sys.exc_info())
         finally:
             if cursor is not None:
                 cursor.close()
+
         
     def executeSqlFromFile(self, fileName=None):
         if fileName is None:
@@ -75,4 +90,3 @@ if __name__ == "__main__":
     for i in range(10):
         result = db.execute("select job_status, created, last_updated from async_job where id=%d"%i)
         print result
-
