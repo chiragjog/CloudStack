@@ -1132,7 +1132,7 @@ class TestResourceLimitsDomain(cloudstackTestCase):
                               self.apiclient,
                               2, # Volume
                               domainid=self.account.account.domainid,
-                              max=1
+                              max=2
                               )
 
         self.debug("Deploying VM for account: %s" % self.account.account.name)
@@ -1175,6 +1175,14 @@ class TestResourceLimitsDomain(cloudstackTestCase):
         #    ready state
         # 4. Try create 3rd template in the domain. It should give the user an
         #    appropriate error and an alert should be generated.
+
+        # Set usage_vm=1 for Account 1
+        update_resource_limit(
+                              self.apiclient,
+                              2, # Volume
+                              domainid=self.account.account.domainid,
+                              max=5
+                              )
 
         self.debug(
             "Updating template resource limits for domain: %s" % 
