@@ -472,7 +472,7 @@ class TestTemplate(cloudstackTestCase):
         list_template_response = Template.list(
                                             self.apiclient,
                                             templatefilter=\
-                                            self.services["templatefilter"],
+                                            self.services["templates"]["templatefilter"],
                                             id=template.id,
                                             zoneid=self.zone.id
                                             )
