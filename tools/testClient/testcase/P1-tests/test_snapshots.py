@@ -1146,13 +1146,14 @@ class TestSnapshotLimit(cloudstackTestCase):
                          self.services["recurring_snapshot"]["maxsnaps"],
                          "Check maximum number of recurring snapshots retained"
                         )
+	snapshot = snapshots[0]
         # Sleep to ensure that snapshot is reflected in sec storage
         time.sleep(self.services["sleep"])
 
         # Fetch values from database
         qresultset = self.dbclient.execute(
                         "select backup_snap_id, account_id, volume_id from snapshots where uuid = '%s';" \
-                        % self.snapshot.id
+                        % snapshot.id
                         )
         self.assertEqual(
                             isinstance(qresultset, list),
