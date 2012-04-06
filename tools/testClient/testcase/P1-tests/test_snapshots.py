@@ -1140,10 +1140,11 @@ class TestSnapshotLimit(cloudstackTestCase):
         # Sleep to ensure that snapshot is reflected in sec storage
         time.sleep(self.services["sleep"])
 
+	snapshot = snapshots[0]
         # Fetch values from database
         qresultset = self.dbclient.execute(
                         "select backup_snap_id, account_id, volume_id from snapshots where id = %s;" \
-                        % self.snapshot.id
+                        % snapshot.id
                         )
         self.assertEqual(
                             isinstance(qresultset, list),
@@ -1223,7 +1224,7 @@ class TestSnapshotLimit(cloudstackTestCase):
                         "SSH access failed for management server: %s" %
                                     self.services["mgmt_server"]["ipaddress"])
 
-            res = str(result)
+            res = str(uuids)
             self.assertEqual(
                         res.count(snapshot_uuid),
                         1,
