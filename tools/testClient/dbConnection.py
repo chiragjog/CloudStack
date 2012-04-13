@@ -16,6 +16,20 @@ class dbConnection(object):
         except:
             traceback.print_exc()
             raise cloudstackException.InvalidParameterException(sys.exc_info())
+
+    def open(self):
+	
+        try:
+            self.db = pymysql.Connect(
+					host=self.host, 
+					port=self.port, 
+					user=self.user, 
+					passwd=self.passwd, 
+					db=self.database
+				)
+        except:
+            traceback.print_exc()
+            raise cloudstackException.InvalidParameterException(sys.exc_info())
         
     def __copy__(self):
         return dbConnection(self.host, self.port, self.user, self.passwd, self.database)
@@ -33,7 +47,10 @@ class dbConnection(object):
         resultRow = []
         cursor = None
         try:
-            # The cloudstackConnection object provides a database connection to execute
+            # Open a connection with database
+	    self.open()
+
+	    # The cloudstackConnection object provides a database connection to execute
             # queries from the test cases. While running multiple tests, the first
             # database query returns valid data, while the rest of the queries in other
             # test cases returns empty lists. The reason being that  probably after querying
@@ -61,6 +78,8 @@ class dbConnection(object):
         finally:
             if cursor is not None:
                 cursor.close()
+	    # Close database connection
+	    self.close()
         
     def executeSqlFromFile(self, fileName=None):
         if fileName is None:
