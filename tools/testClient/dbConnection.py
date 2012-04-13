@@ -34,6 +34,8 @@ class dbConnection(object):
         cursor = None
         try:
 
+	    # Open the database connection
+	    self.open()
             # The cloudstackConnection object provides a database connection to execute
             # queries from the test cases. While running multiple tests, the first
             # database query returns valid data, while the rest of the queries in other
@@ -62,6 +64,8 @@ class dbConnection(object):
         finally:
             if cursor is not None:
                 cursor.close()
+	    # Close the database connection
+	    self.close()
 
         
     def executeSqlFromFile(self, fileName=None):
