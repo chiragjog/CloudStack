@@ -16,7 +16,20 @@ class dbConnection(object):
         except:
             traceback.print_exc()
             raise cloudstackException.InvalidParameterException(sys.exc_info())
-        
+ 
+    def open(self):
+        try:
+            self.db = pymysql.Connect(
+					host=self.host, 
+					port=self.port, 
+					user=self.user, 
+					passwd=self.passwd, 
+					db=self.database
+				)
+        except:
+            traceback.print_exc()
+            raise cloudstackException.InvalidParameterException(sys.exc_info())
+    
     def __copy__(self):
         return dbConnection(self.host, self.port, self.user, self.passwd, self.database)
     
