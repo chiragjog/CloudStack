@@ -1607,40 +1607,82 @@ class SecurityGroup:
         cmd = deleteSecurityGroup.deleteSecurityGroupCmd()
         cmd.id = self.id
         apiclient.deleteSecurityGroup(cmd)
-        
+
     def authorize(self, apiclient, services,
                   account=None, domainid=None, projectid=None):
         """Authorize Ingress Rule"""
-        
+
         cmd=authorizeSecurityGroupIngress.authorizeSecurityGroupIngressCmd()
-        
+
         if domainid:
             cmd.domainid = domainid
         if account:
             cmd.account = account
 
         if projectid:
-            cmd.projectid = projectid        
+            cmd.projectid = projectid
         cmd.securitygroupid=self.id
         cmd.protocol=services["protocol"]
-        
+
         if services["protocol"] == 'ICMP':
             cmd.icmptype = -1
             cmd.icmpcode = -1
         else:
             cmd.startport = services["startport"]
             cmd.endport = services["endport"]
-        
+
         cmd.cidrlist = services["cidrlist"]
         return (apiclient.authorizeSecurityGroupIngress(cmd).__dict__)
-    
+
     def revoke(self, apiclient, id):
         """Revoke ingress rule"""
-        
+
         cmd=revokeSecurityGroupIngress.revokeSecurityGroupIngressCmd()
         cmd.id=id
         return apiclient.revokeSecurityGroupIngress(cmd)
-    
+
+    def authorizeEgress(self, apiclient, services, account=None,
+			domainid=None, projectid=None, user_secgrp_list = {}):
+        """Authorize Egress Rule"""
+
+        cmd=authorizeSecurityGroupEgress.authorizeSecurityGroupEgressCmd()
+
+        if domainid:
+            cmd.domainid = domainid
+        if account:
+            cmd.account = account
+
+        if projectid:
+            cmd.projectid = projectid
+        cmd.securitygroupid=self.id
+        cmd.protocol=services["protocol"]
+
+        if services["protocol"] == 'ICMP':
+            cmd.icmptype = -1
+            cmd.icmpcode = -1
+        else:
+            cmd.startport = services["startport"]
+            cmd.endport = services["endport"]
+
+        if "cidrlist" in services:
+	    cmd.cidrlist = services["cidrlist"]
+
+	cmd.usersecuritygrouplist = []
+        for account, group in user_secgrp_list.items():
+            cmd.usersecuritygrouplist.append({
+                                            'account' : account,
+                                            'group': group
+                                           })
+
+        return (apiclient.authorizeSecurityGroupEgress(cmd).__dict__)
+
+    def revokeEgress(self, apiclient, id):
+        """Revoke Egress rule"""
+
+        cmd=revokeSecurityGroupEgress.revokeSecurityGroupEgressCmd()
+        cmd.id=id
+        return apiclient.revokeSecurityGroupEgress(cmd)
+
     @classmethod
     def list(cls, apiclient, **kwargs):
         """Lists all security groups."""
@@ -1648,7 +1690,7 @@ class SecurityGroup:
         cmd = listSecurityGroups.listSecurityGroupsCmd()
         [setattr(cmd, k, v) for k, v in kwargs.items()]
         return(apiclient.listSecurityGroups(cmd))
-    
+
 class Project:
     """Manage Project life cycle"""
 
