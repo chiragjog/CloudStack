@@ -176,27 +176,6 @@ class TestUserProjectCreation(cloudstackTestCase):
         # 3. Create a Project as domain user
         # 4. In both 2 and 3 project creation should be successful
 
-	# Update the configuration 'allow.user.create.projects'
-	Configurations.update(
-				self.apiclient,
-				name='allow.user.create.projects',
-				value='true'
-			)
-	self.debug("Restarting management server")
-	print self.apiclient.__dict__
-	restart_mgmt_server(self.services["mgmt_server"])
-	# Get new testClient connection
-	connection = cloudstackConnection.cloudConnection(
-							self.apiclient.mgtSvr,
-							self.apiclient.port,
-							self.apiclient.apiKey,
-							self.apiclient.securityKey,
-							self.apiclient.asyncTimeout,
-							self.apiclient.logging
-							)
-	self.testClient.apiClient = cloudstackAPIClient.CloudStackAPIClient(connection)
-	self.apiclient = self.testClient.getApiClient()
-
         configs = Configurations.list(
                                       self.apiclient,
                                       name='allow.user.create.projects'
