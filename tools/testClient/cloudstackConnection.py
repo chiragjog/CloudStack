@@ -47,7 +47,7 @@ class cloudConnection(object):
         hashStr = "&".join(["=".join([str.lower(r[0]), str.lower(urllib.quote_plus(str(r[1]))).replace("+", "%20")]) for r in request])
         sig = urllib.quote_plus(base64.encodestring(hmac.new(self.securityKey, hashStr, hashlib.sha1).digest()).strip())
         requestUrl += "&signature=%s"%sig
-
+	print requestUrl
         try:
             self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
             self.logging.debug("sending GET request: %s"%requestUrl)
@@ -74,17 +74,18 @@ class cloudConnection(object):
         requests["response"] = "json" 
         requests = zip(requests.keys(), requests.values())
         requestUrl = "&".join(["=".join([request[0], urllib.quote_plus(str(request[1]))]) for request in requests])
+	print requestUrl
         self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
         self.logging.debug("sending GET request without auth: %s"%requestUrl)
         response = self.connection.read()
         self.logging.info("got response: %s"%response)
         return response
     
-    def pollAsyncJob(self, jobId, response):
+    def pollAsyncJob(self, jobId, response, timeout=3600):
         cmd = queryAsyncJobResult.queryAsyncJobResultCmd()
         cmd.jobid = jobId
         
-        while self.asyncTimeout > 0:
+        while timeout > 0:
             asyncResonse = self.make_request(cmd, response, True)
             
             if asyncResonse.jobstatus == 2:
@@ -93,7 +94,7 @@ class cloudConnection(object):
                 return asyncResonse
             
             time.sleep(5)
-            self.asyncTimeout = self.asyncTimeout - 5
+            timeout = timeout - 5
             
         raise cloudstackException.cloudstackAPIException("asyncquery", "Async job timeout")
     

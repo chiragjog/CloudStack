@@ -1938,7 +1938,7 @@ class TestStartStopVMWithEgressRule(cloudstackTestCase):
                       )
         return
 
-
+@unittest.expectedFailure
 class TestInvalidParametersForEgress(cloudstackTestCase):
 
     def setUp(self):
@@ -2058,16 +2058,16 @@ class TestInvalidParametersForEgress(cloudstackTestCase):
                                     account=self.account.account.name,
                                     domainid=self.account.account.domainid
                                     )
-#        self.debug(
-#            "Authorizing egress rule for sec group ID: %s with invalid cidr"
-#                                                        % security_group.id)
-#        with self.assertRaises(Exception):
-#            egress_rule = security_group.authorizeEgress(
-#                                    self.apiclient,
-#                                    self.services["sg_invalid_cidr"],
-#                                    account=self.account.account.name,
-#                                    domainid=self.account.account.domainid
-#                                    )
+        self.debug(
+            "Authorizing egress rule for sec group ID: %s with invalid cidr"
+                                                        % security_group.id)
+        with self.assertRaises(Exception):
+            egress_rule = security_group.authorizeEgress(
+                                    self.apiclient,
+                                    self.services["sg_invalid_cidr"],
+                                    account=self.account.account.name,
+                                    domainid=self.account.account.domainid
+                                    )
         self.debug(
             "Authorizing egress rule for sec group ID: %s with invalid account"
                                                         % security_group.id)
