@@ -878,7 +878,7 @@ class ServiceOffering:
         self.__dict__.update(items)
 
     @classmethod
-    def create(cls, apiclient, services, domainid=None):
+    def create(cls, apiclient, services, domainid=None, **kwargs):
         """Create Service offering"""
         cmd = createServiceOffering.createServiceOfferingCmd()
         cmd.cpunumber = services["cpunumber"]
@@ -891,6 +891,7 @@ class ServiceOffering:
         if domainid:
             cmd.domainid = domainid
 
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
         return ServiceOffering(apiclient.createServiceOffering(cmd).__dict__)
 
     def delete(self, apiclient):
@@ -957,8 +958,8 @@ class NetworkOffering:
         """Create network offering"""
         
         cmd = createNetworkOffering.createNetworkOfferingCmd()
-        cmd.displaytext = services["displaytext"]
-        cmd.name = services["name"]
+        cmd.displaytext = "-".join([services["displaytext"], random_gen()])
+        cmd.name = "-".join([services["name"], random_gen()])
         cmd.guestiptype = services["guestiptype"]
         cmd.supportedservices = services["supportedservices"]
         cmd.traffictype = services["traffictype"]
