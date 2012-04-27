@@ -2286,26 +2286,26 @@ class TestEgressAfterHostMaintainance(cloudstackTestCase):
             self.fail("SSH Access failed for %s: %s" % \
                       (self.virtual_machine.ipaddress, e)
                       )
-        hosts = Host.list(
-                          self.apiclient,
-#                          virtualmachineid=self.virtual_machine.id,
-                          listall=True
+        vms = VirtualMachine.list(
+                                    self.apiclient,
+                                    id=self.virtual_machine.id,
+                                    listall=True
                           )
         self.assertEqual(
-                          isinstance(hosts, list),
+                          isinstance(vms, list),
                           True,
                           "Check list hosts response for valid host"
                     )
-        host = hosts[0]
+        vm = vms[0]
 
         self.debug("Enabling host maintainance for ID: %s" % host.id)
         cmd = prepareHostForMaintenance.prepareHostForMaintenanceCmd()
-        cmd.id = host.id
+        cmd.id = vm.hostid
         self.apiclient.prepareHostForMaintenance(cmd)
 
         self.debug("Canceling host maintainance for ID: %s" % host.id)
         cmd = cancelHostMaintenance.cancelHostMaintenanceCmd()
-        cmd.id = host.id
+        cmd.id = vm.hostid
         self.apiclient.cancelHostMaintenance(cmd)
 
         self.debug("Waiting for SSVMs to come up")

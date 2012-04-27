@@ -1040,7 +1040,7 @@ class LoadBalancerRule:
 
     @classmethod
     def create(cls, apiclient, services, ipaddressid, accountid=None, 
-                                                            projectid=None):
+                                        networkid=None, projectid=None):
         """Create Load balancing Rule"""
 
         cmd = createLoadBalancerRule.createLoadBalancerRuleCmd()
@@ -1056,9 +1056,14 @@ class LoadBalancerRule:
         cmd.privateport = services["privateport"]
         cmd.publicport = services["publicport"]
         
+        if "openfirewall" in services:
+            cmd.openfirewall = services["openfirewall"]
+
         if projectid:
             cmd.projectid = projectid
-        
+
+        if networkid:
+            cmd.networkid = networkid
         return LoadBalancerRule(apiclient.createLoadBalancerRule(cmd).__dict__)
 
     def delete(self, apiclient):
@@ -1322,6 +1327,14 @@ class Network:
         cmd = deleteNetwork.deleteNetworkCmd()
         cmd.id = self.id
         apiclient.deleteNetwork(cmd)
+
+    def update(self, apiclient, **kwargs):
+        """Updates network with parameters passed"""
+
+        cmd = updateNetwork.updateNetworkCmd()
+        cmd.id = self.id
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return(apiclient.updateNetwork(cmd))
 
     @classmethod
     def list(cls, apiclient, **kwargs):
