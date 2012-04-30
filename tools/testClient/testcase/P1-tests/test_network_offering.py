@@ -187,12 +187,19 @@ class TestNOVirtualRouter(cloudstackTestCase):
                                      admin=True,
                                      domainid=self.domain.id
                                      )
-        self.cleanup = [self.account]
+        self.cleanup = []
         return
 
     def tearDown(self):
         try:
-            #Clean up, terminate the created accounts, domains etc
+            self.account.delete(self.apiclient)
+            interval = list_configurations(
+                                    self.apiclient,
+                                    name='account.cleanup.interval'
+                                    )
+            # Sleep to ensure that all resources are deleted
+            time.sleep(int(interval[0].value) * 2)
+            #Clean up, terminate the created network offerings
             cleanup_resources(self.apiclient, self.cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
@@ -232,7 +239,7 @@ class TestNOVirtualRouter(cloudstackTestCase):
 
         self.debug("Created n/w offering with ID: %s" %
                                                     self.network_offering.id)
-	# Enable Network offering
+	    # Enable Network offering
         self.network_offering.update(self.apiclient, state='Enabled')
 
         # Creating network using the network offering created
@@ -706,7 +713,7 @@ class TestNOVirtualRouter(cloudstackTestCase):
                             )
         return
 
-@unittest.skip("tested")
+
 class TestNOWithNetscaler(cloudstackTestCase):
 
     @classmethod
@@ -754,12 +761,19 @@ class TestNOWithNetscaler(cloudstackTestCase):
                                      admin=True,
                                      domainid=self.domain.id
                                      )
-        self.cleanup = [self.account]
+        self.cleanup = []
         return
 
     def tearDown(self):
         try:
-            #Clean up, terminate the created accounts, domains etc
+            self.account.delete(self.apiclient)
+            interval = list_configurations(
+                                    self.apiclient,
+                                    name='account.cleanup.interval'
+                                    )
+            # Sleep to ensure that all resources are deleted
+            time.sleep(int(interval[0].value) * 2)
+            #Clean up, terminate the created network offerings
             cleanup_resources(self.apiclient, self.cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
@@ -1389,17 +1403,24 @@ class TestNetworkUpgrade(cloudstackTestCase):
                                      admin=True,
                                      domainid=self.domain.id
                                      )
-        self.cleanup = [self.account]
+        self.cleanup = []
         return
 
     def tearDown(self):
         try:
-            #Clean up, terminate the created accounts, domains etc
+            self.account.delete(self.apiclient)
+            interval = list_configurations(
+                                    self.apiclient,
+                                    name='account.cleanup.interval'
+                                    )
+            # Sleep to ensure that all resources are deleted
+            time.sleep(int(interval[0].value) * 2)
+            #Clean up, terminate the created network offerings
             cleanup_resources(self.apiclient, self.cleanup)
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
-    @unittest.skip("tested")
+
     def test_01_nwupgrade_netscaler_conserve_on(self):
         """Test Nw upgrade to netscaler lb service and conserve mode ON
         """
@@ -1751,7 +1772,7 @@ class TestNetworkUpgrade(cloudstackTestCase):
         vpns = Vpn.list(
                         self.apiclient,
                         publicipid=src_nat.id,
-            listall=True,
+                        listall=True,
                         )
 
         self.assertEqual(
