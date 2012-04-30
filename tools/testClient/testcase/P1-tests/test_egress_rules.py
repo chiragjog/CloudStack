@@ -107,6 +107,11 @@ class Services:
                     "startport": 22,
                     "endport": 22,
                 },
+		"mgmt_server": {
+                    "username": "root",
+                    "password": "fr3sca",
+                    "ipaddress": "192.168.100.21"
+                },
             "ostypeid": '85cb528f-72ed-4df9-ac6a-f6ccf0892ff2',
             # CentOS 5.3 (64-bit)
             "sleep": 60,
@@ -2294,7 +2299,7 @@ class TestEgressAfterHostMaintainance(cloudstackTestCase):
         self.assertEqual(
                           isinstance(vms, list),
                           True,
-                          "Check list hosts response for valid host"
+                          "Check list VMs response for valid host"
                     )
         vm = vms[0]
 
