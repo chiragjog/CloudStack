@@ -47,7 +47,7 @@ class cloudConnection(object):
         hashStr = "&".join(["=".join([str.lower(r[0]), str.lower(urllib.quote_plus(str(r[1]))).replace("+", "%20")]) for r in request])
         sig = urllib.quote_plus(base64.encodestring(hmac.new(self.securityKey, hashStr, hashlib.sha1).digest()).strip())
         requestUrl += "&signature=%s"%sig
-	print requestUrl
+        print requestUrl
         try:
             self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
             self.logging.debug("sending GET request: %s"%requestUrl)
@@ -74,7 +74,7 @@ class cloudConnection(object):
         requests["response"] = "json" 
         requests = zip(requests.keys(), requests.values())
         requestUrl = "&".join(["=".join([request[0], urllib.quote_plus(str(request[1]))]) for request in requests])
-	print requestUrl
+        print requestUrl
         self.connection = urllib2.urlopen("http://%s:%d/client/api?%s"%(self.mgtSvr, self.port, requestUrl))
         self.logging.debug("sending GET request without auth: %s"%requestUrl)
         response = self.connection.read()
