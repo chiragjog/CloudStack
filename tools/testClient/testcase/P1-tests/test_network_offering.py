@@ -251,7 +251,7 @@ class TestNOVirtualRouter(cloudstackTestCase):
                                     accountid=self.account.account.name,
                                     domainid=self.account.account.domainid,
                                     networkofferingid=self.network_offering.id,
-				    zoneid=self.zone.id
+				                    zoneid=self.zone.id
                                     )
         self.debug("Created network with ID: %s" % self.network.id)
 

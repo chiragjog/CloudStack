@@ -68,12 +68,12 @@ class Services:
                          "template_1": {
                                 "displaytext": "Cent OS Template",
                                 "name": "Cent OS Template",
-                                "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
+                                "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
                          },
                          "template_2": {
                                 "displaytext": "Public Template",
                                 "name": "Public template",
-                                "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
+                                "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
                                 "isfeatured": True,
                                 "ispublic": True,
                                 "isextractable": True,
@@ -87,7 +87,7 @@ class Services:
                         "isextractable": False,
                         "bootable": True,
                         "passwordenabled": True,
-                        "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
+                        "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
                         "mode": 'advanced',
                         # Networking mode: Advanced, basic
                         "sleep": 30,

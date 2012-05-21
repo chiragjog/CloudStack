@@ -69,7 +69,7 @@ class Services:
                         "publicport": 22,
                         "protocol": 'TCP',
                         "diskdevice": "/dev/xvdb",
-                        "ostypeid": '5776c0d2-f331-42db-ba3a-29f1f8319bc9',
+                        "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
                         "mode": 'advanced',
                         "sleep": 60,
                         "timeout": 10,

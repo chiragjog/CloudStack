@@ -167,7 +167,7 @@ class TestHighAvailability(cloudstackTestCase):
         except Exception as e:
             raise Exception("Warning: Exception during cleanup : %s" % e)
         return
-
+    @unittest.skip("skipped")
     def test_01_host_maintenance_mode(self):
         """Test host maintenance mode
         """
@@ -266,7 +266,7 @@ class TestHighAvailability(cloudstackTestCase):
                                         ))
         self.debug("Creating PF rule for IP address: %s" %
                                         public_ip.ipaddress.ipaddress)
-        nat_rule= NATRule.create(
+        nat_rule = NATRule.create(
                                  self.apiclient,
                                  virtual_machine,
                                  self.services["natrule"],
@@ -276,6 +276,15 @@ class TestHighAvailability(cloudstackTestCase):
         self.debug("Creating LB rule on IP with NAT: %s" %
                                     public_ip.ipaddress.ipaddress)
 
+        # Open up firewall port for SSH        
+        fw_rule = FireWallRule.create(
+                            self.apiclient,
+                            ipaddressid=public_ip.ipaddress.id,
+                            protocol=self.services["natrule"]["protocol"],
+                            cidrlist=['0.0.0.0/0'],
+                            startport=self.services["natrule"]["publicport"],
+                            endport=self.services["natrule"]["publicport"]
+                            )
         # Create Load Balancer rule on IP already having NAT rule
         lb_rule = LoadBalancerRule.create(
                                     self.apiclient,
@@ -450,6 +459,46 @@ class TestHighAvailability(cloudstackTestCase):
                     "VM migration from one-host-to-other failed while enabling maintenance"
                     )
 
+                # Poll and check the status of VMs
+        timeout = self.services["timeout"]
+        while True:
+            vms = VirtualMachine.list(
+                                  self.apiclient,
+                                  account=self.account.account.name,
+                                  domainid=self.account.account.domainid,
+                                  listall=True
+                                  )
+            self.assertEqual(
+                    isinstance(vms, list),
+                    True,
+                    "List VMs should return valid response for deployed VM"
+                    )
+            self.assertNotEqual(
+                    len(vms),
+                    0,
+                    "List VMs should return valid response for deployed VM"
+                    )
+            vm = vms[1]
+            self.debug(
+                "VM state after enabling maintenance on first host: %s" %
+                                                                    vm.state)
+            if vm.state in [
+                            "Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"
+                            ]:
+                if vm.state == "Running":
+                    break
+                else:
+                    time.sleep(self.services["sleep"])
+                    timeout = timeout - 1
+            else:
+                self.fail(
+                    "VM migration from one-host-to-other failed while enabling maintenance"
+                    )
+
         for vm in vms:
             self.debug(
                 "VM states after enabling maintenance mode on host: %s - %s" %
@@ -459,7 +508,7 @@ class TestHighAvailability(cloudstackTestCase):
                          "Running",
                          "Deployed VM should be in Running state"
                          )
-        
+
         # Spawn an instance on other host
         virtual_machine_3 = VirtualMachine.create(
                                   self.apiclient,
@@ -508,7 +557,7 @@ class TestHighAvailability(cloudstackTestCase):
         cmd.id = second_host
         self.apiclient.cancelHostMaintenance(cmd)
         self.debug("Maintenance mode canceled for host: %s" % second_host)
-        
+
         self.debug("Waiting for SSVMs to come up")
         wait_for_ssvms(
                        self.apiclient,
@@ -619,12 +668,22 @@ class TestHighAvailability(cloudstackTestCase):
                                         ))
         self.debug("Creating PF rule for IP address: %s" %
                                         public_ip.ipaddress.ipaddress)
-        nat_rule= NATRule.create(
+        nat_rule = NATRule.create(
                                  self.apiclient,
                                  virtual_machine,
                                  self.services["natrule"],
                                  ipaddressid=public_ip.ipaddress.id
                                  )
+
+        # Open up firewall port for SSH        
+        fw_rule = FireWallRule.create(
+                            self.apiclient,
+                            ipaddressid=public_ip.ipaddress.id,
+                            protocol=self.services["natrule"]["protocol"],
+                            cidrlist=['0.0.0.0/0'],
+                            startport=self.services["natrule"]["publicport"],
+                            endport=self.services["natrule"]["publicport"]
+                            )
 
         self.debug("Creating LB rule on IP with NAT: %s" %
                                     public_ip.ipaddress.ipaddress)
@@ -685,7 +744,7 @@ class TestHighAvailability(cloudstackTestCase):
                             snapshot.id,
                             "Check snapshot id in list resources call"
                         )
-        
+
         # Generate template from the snapshot
         self.debug("Generating template from snapshot: %s" % snapshot.name)
         template = Template.create_from_snapshot(
@@ -854,7 +913,7 @@ class TestHighAvailability(cloudstackTestCase):
                             snapshot.id,
                             "Check snapshot id in list resources call"
                         )
-        
+
         # Generate template from the snapshot
         self.debug("Generating template from snapshot: %s" % snapshot.name)
         template = Template.create_from_snapshot(
@@ -981,7 +1040,7 @@ class TestHighAvailability(cloudstackTestCase):
                          "Running",
                          "Deployed VM should be in Running state"
                          )
-        
+
         # Spawn an instance on other host
         virtual_machine_3 = VirtualMachine.create(
                                   self.apiclient,
@@ -1020,7 +1079,7 @@ class TestHighAvailability(cloudstackTestCase):
         cmd.id = second_host
         self.apiclient.cancelHostMaintenance(cmd)
         self.debug("Maintenance mode canceled for host: %s" % second_host)
-        
+
         self.debug("Waiting for SSVMs to come up")
         wait_for_ssvms(
                        self.apiclient,
