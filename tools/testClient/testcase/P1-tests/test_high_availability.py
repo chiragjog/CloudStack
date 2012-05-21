@@ -76,7 +76,19 @@ class Services:
                                     "publicport": 22,
                                     "protocol": 'TCP',
                                 },
-                         "ostypeid": '9958b10f-9e5d-4ef1-908d-a047372d823b',
+                         "templates": {
+                                "displaytext": "Public Template",
+                                "name": "Public template",
+                                "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
+                                "url": "http://download.cloud.com/releases/2.0.0/UbuntuServer-10-04-64bit.vhd.bz2",
+                                "hypervisor": 'XenServer',
+                                "format" : 'VHD',
+                                "isfeatured": True,
+                                "ispublic": True,
+                                "isextractable": True,
+                                "templatefilter": 'self',
+                         },
+                         "ostypeid": '946b031b-0e10-4f4a-a3fc-d212ae2ea07f',
                          # Cent OS 5.3 (64 bit)
                          "sleep": 60,
                          "timeout": 100,
@@ -126,14 +138,14 @@ class TestHighAvailability(cloudstackTestCase):
                         ]
         return
 
-#    @classmethod
-#    def tearDownClass(cls):
-#        try:
-#            #Cleanup resources used
-#            cleanup_resources(cls.api_client, cls._cleanup)
-#        except Exception as e:
-#            raise Exception("Warning: Exception during cleanup : %s" % e)
-#        return
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            #Cleanup resources used
+            cleanup_resources(cls.api_client, cls._cleanup)
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
 
     def setUp(self):
         self.apiclient = self.testClient.getApiClient()
@@ -147,14 +159,14 @@ class TestHighAvailability(cloudstackTestCase):
         self.cleanup = [self.account]
         return
 
-#    def tearDown(self):
-#        try:
-#            #Clean up, terminate the created accounts, domains etc
-#            cleanup_resources(self.apiclient, self.cleanup)
-#            self.testClient.close()
-#        except Exception as e:
-#            raise Exception("Warning: Exception during cleanup : %s" % e)
-#        return
+    def tearDown(self):
+        try:
+            #Clean up, terminate the created accounts, domains etc
+            cleanup_resources(self.apiclient, self.cleanup)
+            self.testClient.close()
+        except Exception as e:
+            raise Exception("Warning: Exception during cleanup : %s" % e)
+        return
 
     def test_01_host_maintenance_mode(self):
         """Test host maintenance mode
@@ -317,7 +329,11 @@ class TestHighAvailability(cloudstackTestCase):
             vm = vms[0]
 
             self.debug("VM 1 state: %s" % vm.state)
-            if vm.state in ["Stopping", "Stopped", "Running", "Starting"]:
+            if vm.state in ["Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"]:
                 if vm.state == "Running":
                     break
                 else:
@@ -417,7 +433,13 @@ class TestHighAvailability(cloudstackTestCase):
             self.debug(
                 "VM state after enabling maintenance on first host: %s" %
                                                                     vm.state)
-            if vm.state in ["Stopping", "Stopped", "Running", "Starting"]:
+            if vm.state in [
+                            "Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"
+                            ]:
                 if vm.state == "Running":
                     break
                 else:
@@ -671,7 +693,6 @@ class TestHighAvailability(cloudstackTestCase):
                                                  snapshot,
                                                  self.services["templates"]
                                                  )
-        self.cleanup.append(template)
         self.debug("Created template from snapshot: %s" % template.id)
 
         templates = list_templates(
@@ -727,7 +748,11 @@ class TestHighAvailability(cloudstackTestCase):
             vm = vms[0]
 
             self.debug("VM 1 state: %s" % vm.state)
-            if vm.state in ["Stopping", "Stopped", "Running", "Starting"]:
+            if vm.state in ["Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"]:
                 if vm.state == "Running":
                     break
                 else:
@@ -837,7 +862,6 @@ class TestHighAvailability(cloudstackTestCase):
                                                  snapshot,
                                                  self.services["templates"]
                                                  )
-        self.cleanup.append(template)
         self.debug("Created template from snapshot: %s" % template.id)
 
         templates = list_templates(
@@ -895,7 +919,49 @@ class TestHighAvailability(cloudstackTestCase):
             self.debug(
                 "VM state after enabling maintenance on first host: %s" %
                                                                     vm.state)
-            if vm.state in ["Stopping", "Stopped", "Running", "Starting"]:
+            if vm.state in ["Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"]:
+                if vm.state == "Running":
+                    break
+                else:
+                    time.sleep(self.services["sleep"])
+                    timeout = timeout - 1
+            else:
+                self.fail(
+                    "VM migration from one-host-to-other failed while enabling maintenance"
+                    )
+
+        # Poll and check the status of VMs
+        timeout = self.services["timeout"]
+        while True:
+            vms = VirtualMachine.list(
+                                  self.apiclient,
+                                  account=self.account.account.name,
+                                  domainid=self.account.account.domainid,
+                                  listall=True
+                                  )
+            self.assertEqual(
+                    isinstance(vms, list),
+                    True,
+                    "List VMs should return valid response for deployed VM"
+                    )
+            self.assertNotEqual(
+                    len(vms),
+                    0,
+                    "List VMs should return valid response for deployed VM"
+                    )
+            vm = vms[1]
+            self.debug(
+                "VM state after enabling maintenance on first host: %s" %
+                                                                    vm.state)
+            if vm.state in ["Stopping",
+                            "Stopped",
+                            "Running",
+                            "Starting",
+                            "Migrating"]:
                 if vm.state == "Running":
                     break
                 else:
@@ -948,16 +1014,6 @@ class TestHighAvailability(cloudstackTestCase):
                          "Running",
                          "Deployed VM should be in Running state"
                          )
-
-        # Should be able to SSH VM
-        try:
-            self.debug("SSH into VM: %s" % virtual_machine.id)
-            ssh = virtual_machine.get_ssh_client(
-                                    ipaddress=public_ip.ipaddress.ipaddress)
-        except Exception as e:
-            self.fail("SSH Access failed for %s: %s" % \
-                      (virtual_machine.ipaddress, e)
-                      )
 
         self.debug("Canceling host maintenance for ID: %s" % second_host)
         cmd = cancelHostMaintenance.cancelHostMaintenanceCmd()

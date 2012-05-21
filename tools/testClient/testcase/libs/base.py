@@ -243,6 +243,14 @@ class VirtualMachine:
                                            virtual_machine.domainid,
                                            services
                                            )
+            fw_rule = FireWallRule.create(
+                                          apiclient,
+                                          ipaddressid=public_ip.ipaddress.id,
+                                          protocol='TCP',
+                                          cidrlist=['0.0.0.0/0'],
+                                          startport=22,
+                                          endport=22
+                            )
             nat_rule = NATRule.create(
                                     apiclient,
                                     virtual_machine,
@@ -326,6 +334,20 @@ class VirtualMachine:
         cmd = listVirtualMachines.listVirtualMachinesCmd()
         [setattr(cmd, k, v) for k, v in kwargs.items()]
         return(apiclient.listVirtualMachines(cmd))
+
+    def resetPassword(self, apiclient):
+        """Resets VM password if VM created using password enabled template"""
+
+        cmd = resetPasswordForVirtualMachine.resetPasswordForVirtualMachineCmd()
+        cmd.id = self.id
+        try:
+            response = apiclient.resetPasswordForVirtualMachine(cmd)
+            print response
+        except Exception as e:
+            raise Exception("Reset Password failed! - %s" % e)
+        print type(response)
+        if isinstance(response, list):
+            return response[0].password
 
 
 class Volume:
@@ -476,6 +498,7 @@ class Template:
         cmd.ispublic = services["ispublic"] if "ispublic" in services else False
         cmd.isextractable = services["isextractable"] if "isextractable" in services else False
         cmd.passwordenabled = services["passwordenabled"] if "passwordenabled" in services else False
+        cmd.passwordenabled = services["passwordenabled"] if "passwordenabled" in services else False
 
         if volumeid:
             cmd.volumeid = volumeid
@@ -512,6 +535,7 @@ class Template:
         cmd.isfeatured = services["isfeatured"] if "isfeatured" in services else False
         cmd.ispublic = services["ispublic"] if "ispublic" in services else False
         cmd.isextractable = services["isextractable"] if "isextractable" in services else False
+        cmd.passwordenabled = services["passwordenabled"] if "passwordenabled" in services else False
 
         if account:
             cmd.account = account
@@ -658,12 +682,13 @@ class Iso:
                 response = iso_response[0]
                 # Again initialize timeout to avoid listISO failure
                 timeout = 5
-
+                print response.status
                 # Check whether download is in progress(for Ex:10% Downloaded)
                 # or ISO is 'Successfully Installed'
                 if response.status == 'Successfully Installed':
                     return
-                elif 'Downloaded' not in response.status:
+                elif 'Downloaded' not in response.status and \
+                    'Installing' not in response.status:
                     raise Exception("ErrorInDownload")
 
             elif timeout == 0:
@@ -975,6 +1000,19 @@ class NetworkOffering:
                                             'service': service,
                                             'provider': provider
                                            })
+        if "servicecapabilitylist" in services:
+            cmd.servicecapabilitylist = []
+            for service, capability in services["servicecapabilitylist"].items():
+                for ctype, value in capability.items():
+                    cmd.servicecapabilitylist.append({
+                                            'service': service,
+                                            'capabilitytype': ctype,
+                                            'capabilityvalue': value
+                                           })
+        if "specifyVlan" in services:
+            cmd.specifyVlan = services["specifyVlan"]
+        if "specifyIpRanges" in services:
+            cmd.specifyIpRanges = services["specifyIpRanges"]
 
         [setattr(cmd, k, v) for k, v in kwargs.items()]
 
@@ -1619,6 +1657,13 @@ class PhysicalNetwork:
         cmd.traffictype = type
         return apiclient.addTrafficType(cmd)
 
+    @classmethod
+    def list(cls, apiclient, **kwargs):
+        """Lists all physical networks"""
+
+        cmd = listPhysicalNetworks.listPhysicalNetworksCmd()
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return(apiclient.listPhysicalNetworks(cmd))
 
 class SecurityGroup:
     """Manage Security Groups"""
@@ -1874,3 +1919,115 @@ class Configurations:
         cmd = listConfigurations.listConfigurationsCmd()
         [setattr(cmd, k, v) for k, v in kwargs.items()]
         return(apiclient.listConfigurations(cmd))
+
+
+class NetScaler:
+    """Manage external netscaler device"""
+
+    def __init__(self, items):
+        self.__dict__.update(items)
+
+    @classmethod
+    def add(cls, apiclient, services, physicalnetworkid, username=None, password=None):
+        """Add external netscaler device to cloudstack"""
+
+        cmd = addNetscalerLoadBalancer.addNetscalerLoadBalancerCmd()
+        cmd.physicalnetworkid = physicalnetworkid
+        if username:
+            cmd.username = username
+        else:
+            cmd.username = services["username"]
+
+        if password:
+            cmd.password = password
+        else:
+            cmd.password = services["password"]
+
+        cmd.networkdevicetype = services["networkdevicetype"]
+
+        # Generate the URL
+        url = 'https://' + str(services["ipaddress"]) + '?'
+        url = url + 'publicinterface=' + str(services["publicinterface"]) + '&'
+        url = url + 'privateinterface=' + str(services["privateinterface"]) + '&'
+        url = url + 'numretries=' + str(services["numretries"]) + '&'
+
+        if not services["lbdevicededicated"] and "lbdevicecapacity" in services:
+            url = url + 'lbdevicecapacity=' + str(services["lbdevicecapacity"]) + '&'
+
+        url = url + 'lbdevicededicated=' + str(services["lbdevicededicated"])
+
+        cmd.url = url
+        return NetScaler(apiclient.addNetscalerLoadBalancer(cmd).__dict__)
+
+    def delete(self, apiclient):
+        """Deletes a netscaler device from CloudStack"""
+
+        cmd = deleteNetscalerLoadBalancer.deleteNetscalerLoadBalancerCmd()
+        cmd.lbdeviceid = self.lbdeviceid
+        apiclient.deleteNetscalerLoadBalancer(cmd)
+        return
+
+    def configure(self, apiclient, **kwargs):
+        """List already registered netscaler devices"""
+
+        cmd = configureNetscalerLoadBalancer.configureNetscalerLoadBalancerCmd()
+        cmd.lbdeviceid = self.lbdeviceid
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return(apiclient.configureNetscalerLoadBalancer(cmd))
+
+    @classmethod
+    def list(cls, apiclient, **kwargs):
+        """List already registered netscaler devices"""
+
+        cmd = listNetscalerLoadBalancers.listNetscalerLoadBalancersCmd()
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return(apiclient.listNetscalerLoadBalancers(cmd))
+
+
+class NetworkServiceProvider:
+    """Manage network serivce providers for CloudStack"""
+
+    def __init__(self, items):
+        self.__dict__.update(items)
+
+    @classmethod
+    def add(cls, apiclient, name, physicalnetworkid, servicelist):
+        """Adds network service provider"""
+
+        cmd = addNetworkServiceProvider.addNetworkServiceProviderCmd()
+        cmd.name = name
+        cmd.physicalnetworkid = physicalnetworkid
+        cmd.servicelist = servicelist
+        return NetworkServiceProvider(apiclient.addNetworkServiceProvider(cmd).__dict__)
+
+    def delete(self, apiclient):
+        """Deletes network service provider"""
+
+        cmd = deleteNetworkServiceProvider.deleteNetworkServiceProviderCmd()
+        cmd.id = self.id
+        return apiclient.deleteNetworkServiceProvider(cmd)
+
+    def update(self, apiclient, **kwargs):
+        """Updates network service provider"""
+
+        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
+        cmd.id = self.id
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return apiclient.updateNetworkServiceProvider(cmd)
+
+    @classmethod
+    def update(cls, apiclient, id, **kwargs):
+        """Updates network service provider"""
+
+        cmd = updateNetworkServiceProvider.updateNetworkServiceProviderCmd()
+        cmd.id = id
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return apiclient.updateNetworkServiceProvider(cmd)
+
+    @classmethod
+    def list(cls, apiclient, **kwargs):
+        """List network service providers"""
+
+        cmd = listNetworkServiceProviders.listNetworkServiceProvidersCmd()
+        [setattr(cmd, k, v) for k, v in kwargs.items()]
+        return(apiclient.listNetworkServiceProviders(cmd))
